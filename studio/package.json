@@ -1,0 +1,17 @@
+{
+  "name": "monumento-sanity-studio",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "sanity dev --port 3333",
+    "build": "sanity build",
+    "deploy": "sanity deploy",
+    "typegen": "sanity schema extract --path=./schema.json && sanity typegen generate"
+  },
+  "dependencies": {
+    "@sanity/vision": "^5.4.0",
+    "sanity": "^5.4.0",
+    "styled-components": "^6.3.8"
+  }
+}
