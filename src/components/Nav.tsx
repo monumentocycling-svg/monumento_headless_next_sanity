@@ -5,7 +5,7 @@ export function Nav() {
         <strong>Monumento</strong>
         <nav style={{ display: 'flex', gap: 12 }}>
           <a href="/">Inicio</a>
-          <a href="/">Tienda</a>
+          <a href="/tienda">Tienda</a>
           <a href="/">Café</a>
           <a href="/">Taller</a>
         </nav>

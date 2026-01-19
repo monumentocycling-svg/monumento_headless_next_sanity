@@ -1,82 +1,69 @@
-import { sanityClient } from '@/sanity/client'
-import { categoriesQuery, productsQuery } from '@/sanity/queries'
-import { urlFor } from '@/sanity/image'
+export default function HomePage() {
+  return (
+    <section
+      style={{
+        minHeight: '80vh',
+        backgroundImage: "url('/hero-monumento.jpg')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        position: 'relative'
+      }}
+    >
+      {/* Overlay */}
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(to right, rgba(0,0,0,.75), rgba(0,0,0,.2))'
+        }}
+      />
 
-type Category = { _id: string; title: string; slug: string }
+      <div
+        style={{
+          position: 'relative',
+          maxWidth: 1100,
+          margin: '0 auto',
+          padding: '6rem 1.5rem',
+          color: 'white'
+        }}
+      >
+        <p style={{ letterSpacing: 3, opacity: 0.8 }}>MEDELLÍN · CICLISMO + CAFÉ</p>
 
-type Product = {
-  _id: string
-  title: string
-  slug: string
-  price?: number
-  category?: { title: string; slug: string }
-  mainImage?: any
+        <h1 style={{ fontSize: 64, lineHeight: 1, margin: '1rem 0' }}>
+          Monumento <br /> Taller Café
+        </h1>
+
+        <p style={{ fontSize: 20, maxWidth: 480, opacity: 0.85 }}>
+          Pasión → Maestría → Esencia.
+        </p>
+
+        <p style={{ marginTop: 12, maxWidth: 520, opacity: 0.7 }}>
+          Lo que tu bici y tú, necesitan para mantener el ritmo.
+        </p>
+
+        <div style={{ marginTop: 32, display: 'flex', gap: 12 }}>
+          <a href="/taller" style={btnPrimary}>Agendar servicio</a>
+          <a href="/menu" style={btnSecondary}>Ver menú</a>
+        </div>
+      </div>
+    </section>
+  )
 }
 
-export default async function HomePage() {
-  const [categories, products] = await Promise.all([
-    sanityClient.fetch<Category[]>(categoriesQuery),
-    sanityClient.fetch<Product[]>(productsQuery)
-  ])
+const btnPrimary = {
+  background: '#B88746',
+  color: 'black',
+  padding: '12px 20px',
+  borderRadius: 12,
+  fontWeight: 600,
+  textDecoration: 'none'
+}
 
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-      <section className="card">
-        <h1 style={{ marginTop: 0 }}>Monumento — base headless</h1>
-        <p className="small" style={{ marginBottom: 0 }}>
-          Este proyecto trae: Next 14 (App Router) + cliente Sanity para consumir Categorías y Productos.
-          El Studio vive en <code>/studio</code> como app separada.
-        </p>
-      </section>
-
-      <section className="card">
-        <h2 style={{ marginTop: 0 }}>Categorías</h2>
-        {categories?.length ? (
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-            {categories.map((c) => (
-              <span key={c._id} className="small" style={{ border: '1px solid #e6e6e6', padding: '6px 10px', borderRadius: 999 }}>
-                {c.title} <span style={{ opacity: 0.6 }}>/ {c.slug}</span>
-              </span>
-            ))}
-          </div>
-        ) : (
-          <p className="small">Aún no hay categorías. Créelas en el Studio.</p>
-        )}
-      </section>
-
-      <section className="card">
-        <h2 style={{ marginTop: 0 }}>Últimos productos</h2>
-        {products?.length ? (
-          <div className="grid">
-            {products.map((p) => (
-              <article key={p._id} className="card">
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {p.mainImage ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      alt={p.title}
-                      src={urlFor(p.mainImage).width(800).height(520).fit('crop').url()}
-                      style={{ width: '100%', height: 170, objectFit: 'cover', borderRadius: 12, border: '1px solid #eee' }}
-                    />
-                  ) : (
-                    <div style={{ width: '100%', height: 170, borderRadius: 12, border: '1px dashed #ddd', display: 'grid', placeItems: 'center' }}>
-                      <span className="small">Sin imagen</span>
-                    </div>
-                  )}
-
-                  <strong>{p.title}</strong>
-                  <div className="small">
-                    {p.category ? `${p.category.title}` : 'Sin categoría'}
-                    {typeof p.price === 'number' ? ` · $${p.price.toLocaleString('es-CO')}` : ''}
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
-        ) : (
-          <p className="small">Aún no hay productos. Crea algunos en el Studio.</p>
-        )}
-      </section>
-    </div>
-  )
+const btnSecondary = {
+  border: '1px solid rgba(255,255,255,.3)',
+  color: 'white',
+  padding: '12px 20px',
+  borderRadius: 12,
+  textDecoration: 'none',
+  background: 'rgba(255,255,255,.05)'
 }

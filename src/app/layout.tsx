@@ -1,4 +1,6 @@
 import './globals.css'
+import {SanityLive} from "@/sanity/lib/live"
+
 import type { Metadata } from 'next'
 import { Nav } from '@/components/Nav'
 import { Footer } from '@/components/Footer'
@@ -15,6 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Nav />
         <main className="container">{children}</main>
         <Footer />
+        <SanityLive />
       </body>
     </html>
   )
