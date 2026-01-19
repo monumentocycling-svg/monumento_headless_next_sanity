@@ -5,9 +5,10 @@ import type { Metadata } from 'next'
 import { Nav } from '@/components/Nav'
 import { Footer } from '@/components/Footer'
 
-export const metadata: Metadata = {
-  title: 'Monumento Cycling — Headless + Sanity',
-  description: 'Sitio base con Next.js + Sanity (headless)'
+export const metadata = {
+  title: "Monumento Cycling | Taller de bicicletas, café y experiencias",
+  description:
+    "Monumento Cycling y Monumento Taller Café: taller de bicicletas, café de especialidad y espacio para vivir el ciclismo con detalle, pasión y maestría."
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
