@@ -6,8 +6,8 @@ export function Nav() {
         <nav style={{ display: 'flex', gap: 12 }}>
           <a href="/">Inicio</a>
           <a href="/tienda">Tienda</a>
-          <a href="/">Café</a>
-          <a href="/">Taller</a>
+          <a href="/cafe">Café</a>
+          <a href="/taller">Taller</a>
         </nav>
       </div>
     </header>
