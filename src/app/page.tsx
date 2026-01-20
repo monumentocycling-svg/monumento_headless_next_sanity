@@ -15,22 +15,22 @@ export default function HomePage() {
         style={{
           position: "absolute",
           inset: 0,
-          background:
-            "linear-gradient(to right, rgba(0,0,0,.78), rgba(0,0,0,.28))",
+          background: "linear-gradient(to right, rgba(0,0,0,.78), rgba(0,0,0,.28))",
         }}
       />
 
       <div
         style={{
           position: "relative",
-          height: "100%",
+          height: "100%", // (1) asegura que el contenedor respete la altura calculada del hero
           maxWidth: 980,
           margin: "0 auto",
-          padding: "clamp(18px, 4vw, 56px) 20px",
+          padding: "clamp(16px, 3vw, 44px) 20px", // (3) reduce padding máx para evitar micro-scroll
           color: "white",
           display: "flex",
           flexDirection: "column",
           gap: 14,
+          boxSizing: "border-box", // ayuda a que padding no “empuje” altura
         }}
       >
         <div
@@ -92,12 +92,12 @@ export default function HomePage() {
         </div>
 
         {/* QUIÉNES SOMOS dentro del hero (sin scroll) */}
-        <div style={{ marginTop: "auto" }}>
+        <div style={{ marginTop: "auto" /* (2) empuja el bloque al fondo sin generar scroll */ }}>
           <div
             style={{
               maxWidth: 860,
               borderRadius: 16,
-              padding: "clamp(14px, 2vw, 18px)",
+              padding: "clamp(12px, 2vw, 16px)", // (3) un poco más compacto
               border: "1px solid rgba(255,255,255,.16)",
               background: "rgba(0,0,0,.40)",
               backdropFilter: "blur(10px)",
@@ -105,8 +105,8 @@ export default function HomePage() {
           >
             <h2 style={{ margin: 0, fontSize: 22 }}>Quiénes somos</h2>
             <p style={{ margin: "10px 0 0", opacity: 0.95 }}>
-              En Monumento unimos taller técnico, tienda especializada y café para la comunidad ciclista.
-              Creamos un espacio donde la mecánica es oficio, el café es ritual y cada detalle importa.
+              En Monumento unimos taller técnico, tienda especializada y café para la comunidad ciclista. Creamos un
+              espacio donde la mecánica es oficio, el café es ritual y cada detalle importa.
             </p>
           </div>
         </div>
