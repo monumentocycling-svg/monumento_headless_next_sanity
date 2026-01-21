@@ -118,7 +118,11 @@ export default function CervezasPage() {
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-  <img src="/torrealta-logo.png" alt="Torrealta" style={{ height: 48, width: 'auto' }} />
+  <img
+    src="/torrealta-logo.webp"
+    alt="Torrealta Cervecería"
+    style={{ height: 48, width: 'auto' }}
+  />
   <h2 style={{ margin: 0 }}>Cervezas Torrealta</h2>
 </div>
       <p style={{ maxWidth: 980, opacity: 0.9, marginBottom: 18 }}>
