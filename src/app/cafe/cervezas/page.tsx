@@ -117,7 +117,10 @@ const cervezas = [
 export default function CervezasPage() {
   return (
     <div>
-      <h2 style={{ marginBottom: 8 }}>Cervezas Torrealta</h2>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+  <img src="/torrealta-logo.png" alt="Torrealta" style={{ height: 48, width: 'auto' }} />
+  <h2 style={{ margin: 0 }}>Cervezas Torrealta</h2>
+</div>
       <p style={{ maxWidth: 980, opacity: 0.9, marginBottom: 18 }}>
         Selección artesanal para acompañar el taller: perfiles belgas, saisons, IPA y sour.
       </p>
