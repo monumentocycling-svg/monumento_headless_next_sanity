@@ -1,4 +1,4 @@
-export function listaMenu({
+export function ListaMenu({
 items,
 }: {
 items: { nombre: string; descripcion: string; precio: number }[]
@@ -25,3 +25,4 @@ background: 'rgba(255,255,255,0.02)',
 </div>
 )
 }
+
