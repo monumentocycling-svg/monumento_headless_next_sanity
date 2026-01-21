@@ -122,9 +122,9 @@ export default function CervezasPage() {
         Selección artesanal para acompañar el taller: perfiles belgas, saisons, IPA y sour.
       </p>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 18 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 18 }}>
         {cervezas.map((c) => (
-          <ItemConMedia key={c.nombre} {...c} mediaHeight={140} />
+          <ItemConMedia key={c.nombre} {...c} mediaHeight={120} />
         ))}
       </div>
 
