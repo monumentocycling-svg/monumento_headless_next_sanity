@@ -1,4 +1,4 @@
-export function ListaMenu({
+export function listaMenu({
 items,
 }: {
 items: { nombre: string; descripcion: string; precio: number }[]
