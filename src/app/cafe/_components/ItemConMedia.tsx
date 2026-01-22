@@ -21,7 +21,7 @@ export function ItemConMedia({
   precio,
   mediaSrc,
   mediaType,
-  mediaHeight = 140, // default pequeño
+  mediaHeight = 110, // default pequeño
 }: Props) {
   const fmt = new Intl.NumberFormat('es-CO')
 
@@ -53,6 +53,7 @@ export function ItemConMedia({
               muted
               playsInline
               preload="metadata"
+	      poster="/video-poster.webp"
               style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
             />
           ) : (
@@ -65,13 +66,22 @@ export function ItemConMedia({
         </div>
       ) : null}
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12 }}>
-        <h3 style={{ margin: 0 }}>{nombre}</h3>
-        <strong>${fmt.format(precio)}</strong>
-      </div>
+      <div
+  style={{
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+    gap: 12,
+  }}
+>
+  <h3 style={{ margin: 0, fontSize: 18 }}>{nombre}</h3>
+  <span style={{ fontWeight: 700, fontSize: 16 }}>
+    ${fmt.format(precio)}
+  </span>
+</div>
 
       {(estilo || abv || typeof ibus === 'number') && (
-        <div style={{ opacity: 0.9, marginTop: 4 }}>
+       <div style={{ opacity: 0.75, marginTop: 6, fontSize: 13 }}>
           {estilo ? estilo : ''}
           {abv ? ` · ${abv}` : ''}
           {typeof ibus === 'number' ? ` · ${ibus} IBUs` : ''}

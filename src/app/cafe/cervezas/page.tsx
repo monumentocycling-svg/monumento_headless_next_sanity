@@ -112,32 +112,61 @@ const cervezas = [
     mediaSrc: '/diva.mp4',
     mediaType: 'video' as const,
   },
+  {
+    nombre: 'La Germana Olvidada',
+    estilo: 'Gose',
+    abv: '5%',
+    ibus: 5,
+    precio: 17000,
+    descripcion:
+      'Rubia alemana de tradición milenaria, refrescante y ligera. Notas cítricas con coriandro y un sutil toque salino que la hace perfecta para el calor.',
+    mediaSrc: '/germanaOlvidada.mp4',
+    mediaType: 'video',
+  },
+  {
+    nombre: 'La Provinciana',
+    estilo: 'French Saison',
+    abv: '6.5%',
+    ibus: 27,
+    precio: 17000,
+    descripcion:
+      'Cerveza rústica de granja, seca y especiada. Sabores frutales y cítricos con un amargo medio que acompaña largas jornadas.',
+    mediaSrc: '/provinciana.mp4',
+    mediaType: 'video',
+  },
 ]
 
 export default function CervezasPage() {
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+      <div
+  style={{
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: 16,
+    marginBottom: 32,
+  }}
+>
   <img
     src="/torrealta-logo.webp"
     alt="Torrealta Cervecería"
-    style={{ height: 120, width: 'auto' }}
+    style={{ height: 220, width: 'auto' }}
   />
-  <h2 style={{ margin: 0 }}>Cervezas Torrealta</h2>
+  <h2 style={{ margin: 0, textAlign: 'center' }}>
+    Cervezas Torrealta
+  </h2>
 </div>
       <p style={{ maxWidth: 980, opacity: 0.9, marginBottom: 18 }}>
         Selección artesanal para acompañar el taller: perfiles belgas, saisons, IPA y sour.
       </p>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 18 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 24 }}>
         {cervezas.map((c) => (
-          <ItemConMedia key={c.nombre} {...c} mediaHeight={120} />
+          <ItemConMedia key={c.nombre} {...c} mediaHeight={100} />
         ))}
       </div>
 
-      <div style={{ marginTop: 18, opacity: 0.85 }}>
-        <strong>Pendientes por media:</strong> La Provinciana (French Saison) y La Germana Olvidada (Gose).
-      </div>
-    </div>
+ </div>
   )
 }
