@@ -1,9 +1,21 @@
 // FILE: src/app/cafe/cervezas/page.tsx
-// Nota: este archivo debe ser CLIENT COMPONENT porque usamos estado para filtrar.
 'use client'
 
 import { useMemo, useState } from 'react'
 import { ItemConMedia } from '../_components/ItemConMedia'
+
+const filtros = [
+  'Todas',
+  'Refrescantes',
+  'Saison',
+  'Lupuladas',
+  'Oscuras',
+  'Belgian Strong',
+  'Sour',
+] as const
+
+type Filtro = (typeof filtros)[number]
+type Categoria = Exclude<Filtro, 'Todas'>
 
 type Cerveza = {
   nombre: string
@@ -14,16 +26,7 @@ type Cerveza = {
   descripcion: string
   mediaSrc: string
   mediaType: 'video' | 'image'
-  categorias: Array<
-  | 'Refrescantes'
-  | 'Saison'
-  | 'Lupuladas'
-  | 'Rojas/Ámbar'
-  | 'Oscuras'
-  | 'Belgian Strong'
-  | 'Sour'
->
-
+  categorias: Categoria[] // ✅ permite estar en 2 filtros
 }
 
 const cervezas: Cerveza[] = [
@@ -35,7 +38,7 @@ const cervezas: Cerveza[] = [
     ibus: 5,
     precio: 17000,
     descripcion:
-      'Rubia alemana de tradición milenaria, refrescante y ligera. Notas cítricas con coriandro y un sutil toque salino.',
+      'Rubia alemana de tradición milenaria. Refrescante, cítrica, con coriandro y un toque salino.',
     mediaSrc: '/germanaOlvidada.mp4',
     mediaType: 'video',
     categorias: ['Refrescantes'],
@@ -47,7 +50,7 @@ const cervezas: Cerveza[] = [
     ibus: 13,
     precio: 17000,
     descripcion:
-      'Trigo con naranja, coriandro, pimienta y un toque de vainilla. Muy aromática y fácil.',
+      'Trigo con naranja, coriandro, pimienta y un toque de vainilla. Bomba aromática y muy fácil.',
     mediaSrc: '/laValiente.webp',
     mediaType: 'image',
     categorias: ['Refrescantes'],
@@ -59,10 +62,10 @@ const cervezas: Cerveza[] = [
     ibus: 27,
     precio: 17000,
     descripcion:
-      'Clara, chispeante y fácil de tomar; especiada, frutal y seca. Ideal para seguir el recorrido.',
+      'Clara, chispeante y fácil de tomar. Especiada, frutal y seca: compañera de ruta.',
     mediaSrc: '/gregario.mp4',
     mediaType: 'video',
-    categorias: ['Refrescantes'],
+    categorias: ['Refrescantes', 'Belgian Strong'], // ✅ belga “base” de la carta
   },
 
   // Saison
@@ -73,7 +76,7 @@ const cervezas: Cerveza[] = [
     ibus: 25,
     precio: 17000,
     descripcion:
-      'Saison rubia y tomable con lúpulo americano: fresca, moderna y balanceada.',
+      'Saison rubia y tomable con lúpulo americano. Fenoles belgas + toque moderno.',
     mediaSrc: '/justa.mp4',
     mediaType: 'video',
     categorias: ['Saison'],
@@ -85,7 +88,7 @@ const cervezas: Cerveza[] = [
     ibus: 27,
     precio: 17000,
     descripcion:
-      'Cerveza rústica de granja, seca y especiada. Sabores frutales y cítricos con un amargo medio.',
+      'Cerveza de granja: seca, rústica y especiada. Frutal, cítrica y con amargo medio.',
     mediaSrc: '/provinciana.mp4',
     mediaType: 'video',
     categorias: ['Saison'],
@@ -97,10 +100,10 @@ const cervezas: Cerveza[] = [
     ibus: 20,
     precio: 17000,
     descripcion:
-      'Ligera y chispeante, herbales sutiles. Oscura en color, brillante en frescura.',
+      'Ligera y chispeante, notas herbales sutiles. Oscura en color, refrescante en boca.',
     mediaSrc: '/prejuicio.webp',
     mediaType: 'image',
-    categorias: ['Oscuras','Saison'],
+    categorias: ['Saison'],
   },
 
   // Lupuladas
@@ -111,7 +114,7 @@ const cervezas: Cerveza[] = [
     ibus: 61,
     precio: 17000,
     descripcion:
-      'Amarga, aromática y refrescante; notas frutales y cítricas. (No esperes siempre la misma).',
+      'Amarga y muy aromática. Notas frutales (maracuyá, durazno, mango) y cítricos. (No esperes siempre la misma).',
     mediaSrc: '/ninoSinPadre.mp4',
     mediaType: 'video',
     categorias: ['Lupuladas'],
@@ -131,7 +134,7 @@ const cervezas: Cerveza[] = [
     categorias: ['Oscuras'],
   },
 
-  // Belgian Strong
+  // Belgian Strong (core belga)
   {
     nombre: 'La Bruja',
     estilo: 'Belgian Dubbel',
@@ -139,11 +142,10 @@ const cervezas: Cerveza[] = [
     ibus: 19,
     precio: 17000,
     descripcion:
-      'Cobriza y compleja; malta y sirope belga con notas a caramelo seco, ciruelas y frutas secas.',
+      'Cobriza profunda y compleja. Balance a malta y sirope belga: caramelo seco, ciruelas y frutas secas.',
     mediaSrc: '/laBruaja.mp4',
     mediaType: 'video',
-    categorias: ['Belgian Strong', 'Rojas/Ámbar'],
-
+    categorias: ['Belgian Strong'],
   },
   {
     nombre: 'El Rey de Palmas',
@@ -152,11 +154,10 @@ const cervezas: Cerveza[] = [
     ibus: 23,
     precio: 17000,
     descripcion:
-      'Rubia fuerte: pera y durazno, con jengibre fresco y pimienta africana.',
+      'Rubia fuerte: pera y durazno, especiada con jengibre fresco y pimienta africana.',
     mediaSrc: '/reyDePalmas.mp4',
     mediaType: 'video',
     categorias: ['Belgian Strong'],
-
   },
   {
     nombre: 'La Dama Alegre',
@@ -170,6 +171,8 @@ const cervezas: Cerveza[] = [
     mediaType: 'video',
     categorias: ['Belgian Strong'],
   },
+
+  // Pedalista: Oscura + Belgian Strong (doble filtro como pediste)
   {
     nombre: 'El Pedalista',
     estilo: 'Belgian Quadrupel',
@@ -177,11 +180,10 @@ const cervezas: Cerveza[] = [
     ibus: 25,
     precio: 18000,
     descripcion:
-      'Cobre oscura, casi negra; sirope belga (sin ser dulce) y notas a ciruelas e higos.',
+      'Cobre oscura, casi negra. Sirope belga (sin ser dulce), ciruelas, higos y frutas oscuras deshidratadas.',
     mediaSrc: '/pedalista.mp4',
     mediaType: 'video',
-    categorias: ['Belgian Strong','Oscuras'],
-
+    categorias: ['Oscuras', 'Belgian Strong'], // ✅ doble filtro
   },
 
   // Sour
@@ -191,33 +193,21 @@ const cervezas: Cerveza[] = [
     abv: '4.5%',
     ibus: 15,
     precio: 17000,
-    descripcion: 'Ácida y frutal; fruta fresca que cambia por temporada.',
+    descripcion:
+      'Ácida y frutal. Enriquecida con fruta fresca (cambia por temporada).',
     mediaSrc: '/diva.mp4',
     mediaType: 'video',
     categorias: ['Sour'],
   },
 ]
 
-const categorias = [
-  'Todas',
-  'Refrescantes',
-  'Saison',
-  'Lupuladas',
-  'Rojas/Ámbar',
-  'Oscuras',
-  'Belgian Strong',
-  'Sour',
-] as const
-
-
 export default function CervezasPage() {
-  const [cat, setCat] = useState<Cerveza['categorias']>('Todas')
+  const [cat, setCat] = useState<Filtro>('Todas')
 
-const filtradas = useMemo(() => {
-  if (cat === 'Todas') return cervezas
-  return cervezas.filter((c) => c.categorias.includes(cat))
-}, [cat])
-
+  const filtradas = useMemo(() => {
+    if (cat === 'Todas') return cervezas
+    return cervezas.filter((c) => c.categorias.includes(cat as Categoria))
+  }, [cat])
 
   return (
     <div>
@@ -244,11 +234,19 @@ const filtradas = useMemo(() => {
       </p>
 
       {/* Filtro */}
-      <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 18, flexWrap: 'wrap' }}>
+      <div
+        style={{
+          display: 'flex',
+          gap: 12,
+          alignItems: 'center',
+          marginBottom: 18,
+          flexWrap: 'wrap',
+        }}
+      >
         <label style={{ opacity: 0.85, fontWeight: 600 }}>Filtrar por estilo:</label>
         <select
           value={cat}
-          onChange={(e) => setCat(e.target.value as Cerveza['categoria'])}
+          onChange={(e) => setCat(e.target.value as Filtro)}
           style={{
             padding: '10px 12px',
             borderRadius: 10,
@@ -257,9 +255,9 @@ const filtradas = useMemo(() => {
             color: 'inherit',
           }}
         >
-          {categorias.map((c) => (
-            <option key={c} value={c}>
-              {c}
+          {filtros.map((f) => (
+            <option key={f} value={f}>
+              {f}
             </option>
           ))}
         </select>
