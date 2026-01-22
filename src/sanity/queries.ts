@@ -14,3 +14,29 @@ export const productsQuery = groq`*[_type=="product"]|order(_createdAt desc)[0..
   category->{_id, title, "slug": slug.current},
   mainImage
 }`
+
+export const contactInfoQuery = groq`*[_type=="contactinfo"][0]{
+  _id,
+  businessName,
+  phone,
+  whatsapp,
+  email,
+  website,
+  instagram,
+  address,
+  city,
+  country,
+  location,
+  maps{
+    googleMapsUrl,
+    wazeUrl,
+    howToGetThere
+  },
+  bookingUrl,
+  openingHours[]{
+    day,
+    open,
+    close,
+    notes
+  }
+}`
