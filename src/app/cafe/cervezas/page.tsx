@@ -211,7 +211,7 @@ const categorias = [
 
 
 export default function CervezasPage() {
-  const [cat, setCat] = useState<Cerveza['categoria']>('Todas')
+  const [cat, setCat] = useState<Cerveza['categorias']>('Todas')
 
 const filtradas = useMemo(() => {
   if (cat === 'Todas') return cervezas
