@@ -1,33 +1,35 @@
-import {sanityFetch} from '@/sanity/lib/live'
-import { categoriesQuery, productsQuery } from '@/sanity/queries'
-import { urlFor } from '@/sanity/image'
+import { sanityFetch } from "@/sanity/lib/live";
+import { categoriesQuery, productsQuery } from "@/sanity/queries";
+import { urlFor } from "@/sanity/image";
+import type { SanityImageSource } from "@sanity/image-url/lib/types/types";
 
-type Category = { _id: string; title: string; slug: string }
+type Category = { _id: string; title: string; slug: string };
 
 type Product = {
-  _id: string
-  title: string
-  slug: string
-  price?: number
-  category?: { title: string; slug: string }
-  mainImage?: any
-}
+  _id: string;
+  title: string;
+  slug: string;
+  price?: number;
+  category?: { title: string; slug: string };
+  mainImage?: SanityImageSource;
+};
 
 export default async function TiendaPage() {
   const [catRes, prodRes] = await Promise.all([
-  sanityFetch({query: categoriesQuery}),
-  sanityFetch({query: productsQuery})
-])
+    sanityFetch({ query: categoriesQuery }),
+    sanityFetch({ query: productsQuery }),
+  ]);
 
-const categories = catRes.data as Category[]
-const products = prodRes.data as Product[]
+  const categories = catRes.data as Category[];
+  const products = prodRes.data as Product[];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
       <section className="card">
         <h1 style={{ marginTop: 0 }}>Tienda</h1>
         <p className="small" style={{ marginBottom: 0 }}>
-          Catálogo conectado a Sanity. Si no ves nada, crea Categorías y Productos en el Studio.
+          Catálogo conectado a Sanity. Si no ves nada, crea Categorías y
+          Productos en el Studio.
         </p>
       </section>
 
@@ -35,15 +37,15 @@ const products = prodRes.data as Product[]
         <h2 style={{ marginTop: 0 }}>Categorías</h2>
 
         {categories?.length ? (
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             {categories.map((c) => (
               <span
                 key={c._id}
                 className="small"
                 style={{
-                  border: '1px solid #e6e6e6',
-                  padding: '6px 10px',
-                  borderRadius: 999
+                  border: "1px solid #e6e6e6",
+                  padding: "6px 10px",
+                  borderRadius: 999,
                 }}
               >
                 {c.title} <span style={{ opacity: 0.6 }}>/ {c.slug}</span>
@@ -62,29 +64,35 @@ const products = prodRes.data as Product[]
           <div className="grid">
             {products.map((p) => (
               <article key={p._id} className="card">
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div
+                  style={{ display: "flex", flexDirection: "column", gap: 8 }}
+                >
                   {p.mainImage ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       alt={p.title}
-                      src={urlFor(p.mainImage).width(900).height(520).fit('crop').url()}
+                      src={urlFor(p.mainImage)
+                        .width(900)
+                        .height(520)
+                        .fit("crop")
+                        .url()}
                       style={{
-                        width: '100%',
+                        width: "100%",
                         height: 170,
-                        objectFit: 'cover',
+                        objectFit: "cover",
                         borderRadius: 12,
-                        border: '1px solid #eee'
+                        border: "1px solid #eee",
                       }}
                     />
                   ) : (
                     <div
                       style={{
-                        width: '100%',
+                        width: "100%",
                         height: 170,
                         borderRadius: 12,
-                        border: '1px dashed #ddd',
-                        display: 'grid',
-                        placeItems: 'center'
+                        border: "1px dashed #ddd",
+                        display: "grid",
+                        placeItems: "center",
                       }}
                     >
                       <span className="small">Sin imagen</span>
@@ -94,17 +102,21 @@ const products = prodRes.data as Product[]
                   <strong>{p.title}</strong>
 
                   <div className="small">
-                    {p.category ? `${p.category.title}` : 'Sin categoría'}
-                    {typeof p.price === 'number' ? ` · $${p.price.toLocaleString('es-CO')}` : ''}
+                    {p.category ? `${p.category.title}` : "Sin categoría"}
+                    {typeof p.price === "number"
+                      ? ` · $${p.price.toLocaleString("es-CO")}`
+                      : ""}
                   </div>
                 </div>
               </article>
             ))}
           </div>
         ) : (
-          <p className="small">Aún no hay productos. Crea algunos en el Studio.</p>
+          <p className="small">
+            Aún no hay productos. Crea algunos en el Studio.
+          </p>
         )}
       </section>
     </div>
-  )
+  );
 }
