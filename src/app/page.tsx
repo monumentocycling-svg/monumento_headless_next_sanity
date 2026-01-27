@@ -1,7 +1,7 @@
 import React from "react";
 import { client } from "@/sanity/client";
 import { contactInfoQuery } from "@/sanity/queries";
-import WhatsappButton from "@/components/WhatsappButton";
+import WhatsAppButton from "@/components/WhatsAppButton";
 
 /* ================= ICONOS ================= */
 
@@ -252,7 +252,7 @@ export default async function HomePage() {
           }}
         >
           {/* WhatsApp – PRIMERO (hover/focus/anim se manejan en su CSS module) */}
-          {waDigits && <WhatsappButton phoneNumber={waDigits} />}
+          {waDigits && <WhatsAppButton phoneNumber={waDigits} />}
 
           {/* Teléfono (sin número visible; sí en title y acción tel:) */}
           {phoneNumber && (
