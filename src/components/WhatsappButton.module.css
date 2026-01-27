@@ -1,0 +1,40 @@
+.wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 12px;
+  padding: 10px 12px;
+  opacity: 0.9;
+}
+
+.wrapper:hover,
+.wrapper:focus-visible {
+  border-color: rgba(255, 255, 255, 0.35);
+  opacity: 1;
+  outline: 2px solid rgba(200, 155, 82, 0.9);
+  outline-offset: 3px;
+}
+
+/* micro-anim solo en el icono */
+@keyframes mmtWaPop {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.wrapper:hover .iconWrap,
+.wrapper:focus-visible .iconWrap {
+  animation: mmtWaPop 220ms ease-out;
+}
+
+.label {
+  letter-spacing: 0.2px;
+}

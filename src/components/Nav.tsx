@@ -1,21 +1,53 @@
+"use client";
+
+import Link from "next/link";
+import Image from "next/image";
+import { usePathname } from "next/navigation";
+import styles from "./Nav.module.css";
+
+const items = [
+  { href: "/", label: "Inicio" },
+  { href: "/tienda", label: "Tienda" },
+  { href: "/cafe", label: "Café" },
+  { href: "/taller", label: "Taller" },
+];
+
 export function Nav() {
+  const pathname = usePathname();
+
   return (
-    <header style={{ borderBottom: '1px solid #eee' }}>
-      <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <a href="/" style={{ display: 'flex', alignItems: 'center' }}>
-          <img
+    <header className={styles.header}>
+      <div className={styles.inner}>
+        <Link href="/" className={styles.brand} aria-label="Monumento">
+          <Image
             src="/logo.png"
-            alt="Monumento logo"
-            style={{ height: 120 }}  // antes: 40, ahora triplicado
+            alt="Monumento Taller Café"
+            width={320} // 🔥 más grande
+            height={90}
+            priority
+            className={styles.logo}
           />
-        </a>
-        <nav style={{ display: 'flex', gap: 12 }}>
-          <a href="/">Inicio</a>
-          <a href="/tienda">Tienda</a>
-          <a href="/cafe">Café</a>
-          <a href="/taller">Taller</a>
+        </Link>
+
+        <nav className={styles.nav} aria-label="Navegación principal">
+          {items.map((it) => {
+            const active =
+              it.href === "/"
+                ? pathname === "/"
+                : pathname?.startsWith(it.href);
+
+            return (
+              <Link
+                key={it.href}
+                href={it.href}
+                className={`${styles.link} ${active ? styles.active : ""}`}
+              >
+                {it.label}
+              </Link>
+            );
+          })}
         </nav>
       </div>
     </header>
-  )
+  );
 }
