@@ -1,3 +1,4 @@
+// src/components/Nav.tsx
 "use client";
 
 import Link from "next/link";
@@ -22,9 +23,10 @@ export function Nav() {
           <Image
             src="/logo.png"
             alt="Monumento Taller Café"
-            width={320} // 🔥 más grande
-            height={90}
+            width={1600}
+            height={450}
             priority
+            quality={100}
             className={styles.logo}
           />
         </Link>

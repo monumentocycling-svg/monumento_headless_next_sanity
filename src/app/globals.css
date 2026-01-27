@@ -1,9 +1,20 @@
 :root {
   color-scheme: light;
+
+  --mmt-ink: rgba(0, 0, 0, 0.92);
+  --mmt-ink-soft: rgba(0, 0, 0, 0.72);
+  --mmt-line: rgba(0, 0, 0, 0.1);
+
+  --mmt-gold: rgba(200, 155, 82, 0.95);
+  --mmt-gold-soft: rgba(200, 155, 82, 0.35);
+
+  scroll-padding-top: 140px; /* ajusta según header */
 }
+
 * {
   box-sizing: border-box;
 }
+
 html,
 body {
   padding: 0;
@@ -18,25 +29,34 @@ body {
     "Apple Color Emoji",
     "Segoe UI Emoji";
 }
+
+html {
+  scroll-behavior: smooth;
+}
+
 a {
   color: inherit;
   text-decoration: none;
 }
+
 .container {
   max-width: 1100px;
   margin: 0 auto;
   padding: 20px;
 }
+
 .card {
   border: 1px solid #e6e6e6;
   border-radius: 14px;
   padding: 16px;
 }
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 14px;
 }
+
 .small {
   color: #666;
   font-size: 13px;
@@ -49,19 +69,7 @@ a {
 }
 
 .mmt-contact-btn:focus-visible {
-  outline: 2px solid rgba(200, 155, 82, 0.9);
-  outline-offset: 3px;
-  border-color: rgba(255, 255, 255, 0.35);
-}
-
-/* Contact buttons: hover + focus-visible unificados */
-.mmt-contact-btn:hover {
-  opacity: 1;
-  border-color: rgba(255, 255, 255, 0.35);
-}
-
-.mmt-contact-btn:focus-visible {
-  outline: 2px solid rgba(200, 155, 82, 0.9);
+  outline: 2px solid var(--mmt-gold);
   outline-offset: 3px;
   border-color: rgba(255, 255, 255, 0.35);
 }
