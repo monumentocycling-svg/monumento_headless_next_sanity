@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import styles from "./WhatsappButton.module.css";
+import styles from "./WhatsAppButton.module.css";
 
 type Props = {
   phoneNumber: string;
