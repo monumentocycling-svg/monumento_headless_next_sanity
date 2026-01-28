@@ -8,6 +8,7 @@ type Props = {
   precioDesde?: number;
   precioHasta?: number;
   notas?: string;
+
   mediaSrc?: string;
   mediaType?: "video" | "image";
   mediaHeight?: number;
@@ -28,7 +29,9 @@ export function ItemCafeConMedia({
   mediaHeight = 110,
 }: Props) {
   const fmt = new Intl.NumberFormat("es-CO");
-  const hasMedia = Boolean(mediaSrc);
+
+  // ✅ Narrowing real para TS (nunca será undefined aquí)
+  const media = mediaSrc ?? null;
 
   const renderPrecio = () => {
     if (typeof precio === "number") return `$${fmt.format(precio)}`;
@@ -48,7 +51,6 @@ export function ItemCafeConMedia({
         background: "rgba(255,255,255,0.02)",
       }}
     >
-      {/* Media (si no hay media, usa placeholder premium) */}
       <div
         style={{
           width: "100%",
@@ -60,16 +62,15 @@ export function ItemCafeConMedia({
           position: "relative",
         }}
       >
-        {hasMedia ? (
+        {media ? (
           mediaType === "video" ? (
             <video
-              src={mediaSrc}
+              src={media}
               autoPlay
               loop
               muted
               playsInline
               preload="metadata"
-              // CLAVE: si hay video real, NO solicitamos poster
               poster={undefined}
               style={{
                 width: "100%",
@@ -80,7 +81,7 @@ export function ItemCafeConMedia({
             />
           ) : (
             <Image
-              src={mediaSrc!}
+              src={media}
               alt={nombre}
               fill
               sizes="(max-width: 768px) 100vw, 420px"
@@ -97,14 +98,13 @@ export function ItemCafeConMedia({
               style={{ objectFit: "cover" }}
             />
 
-            {/* Overlay traslúcido + texto difuminado */}
             <div
               style={{
                 position: "absolute",
                 inset: 0,
                 display: "grid",
                 placeItems: "center",
-                background: "rgba(255,255,255,0.14)",
+                background: "rgba(255,255,255,0.12)",
                 backdropFilter: "blur(2px)",
               }}
             >
@@ -112,9 +112,9 @@ export function ItemCafeConMedia({
                 style={{
                   fontWeight: 900,
                   letterSpacing: 0.2,
-                  color: "rgba(0,0,0,0.45)",
-                  background: "rgba(255,255,255,0.55)",
-                  border: "1px solid rgba(0,0,0,0.08)",
+                  color: "rgba(0,0,0,0.35)",
+                  background: "rgba(255,255,255,0.20)",
+                  border: "1px solid rgba(0,0,0,0.06)",
                   padding: "10px 14px",
                   borderRadius: 999,
                 }}
@@ -145,6 +145,7 @@ export function ItemCafeConMedia({
       {descripcion ? (
         <p style={{ marginTop: 8, opacity: 0.9 }}>{descripcion}</p>
       ) : null}
+
       {notas ? (
         <p style={{ marginTop: 8, opacity: 0.75, fontSize: 13 }}>{notas}</p>
       ) : null}
