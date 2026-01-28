@@ -20,8 +20,8 @@ const TOPBAR_OFFSET = 56;
 const SCROLL_OFFSET = NAV_OFFSET + PAGE_HEADER_OFFSET + TOPBAR_OFFSET;
 const ARRIVAL_TOLERANCE = 14;
 
-// ===== Filtros =====
-const beerFilters = [
+// ===== Filtros Cervezas =====
+const cervezaFilters = [
   "Todas",
   "Refrescantes",
   "Saison",
@@ -31,11 +31,13 @@ const beerFilters = [
   "Sour",
 ] as const;
 
-type BeerFilter = (typeof beerFilters)[number];
-type BeerCategory = Exclude<BeerFilter, "Todas">;
+type CervezaFilter = (typeof cervezaFilters)[number];
+type CervezaCategory = Exclude<CervezaFilter, "Todas">;
 
-const coffeeFilters = ["Todos", "Calientes", "Con leche", "Fríos"] as const;
+// ===== Filtros Cafés =====
+const coffeeFilters = ["Todos", "Calientes", "Fríos", "Métodos"] as const;
 type CoffeeFilter = (typeof coffeeFilters)[number];
+type CoffeeTag = Exclude<CoffeeFilter, "Todos">;
 
 // ===== Tipos cervezas (para ItemConMedia) =====
 type CategoriaCerveza =
@@ -231,11 +233,145 @@ const cervezas: Cerveza[] = [
   },
 ];
 
+function formatCOP(n: number) {
+  const s = Math.round(n).toString();
+  const withDots = s.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  return `$${withDots}`;
+}
+
+// =======================
+// Tipos genéricos para cards con media
+// =======================
+type MediaType = "video" | "image";
+
+type MenuCardItem = {
+  nombre: string;
+  descripcion?: string;
+  precio?: string; // "$7.500" | "Desde $9.500" | "Consultar"
+  mediaSrc?: string;
+  mediaType?: MediaType;
+};
+
+function MenuCardGrid({
+  items,
+  mediaHeight = 110,
+}: {
+  items: MenuCardItem[];
+  mediaHeight?: number;
+}) {
+  return (
+    <div className="cardGrid">
+      {items.map((it) => (
+        <div key={it.nombre} className="card">
+          <div className="media" style={{ height: mediaHeight }}>
+            {it.mediaSrc ? (
+              it.mediaType === "video" ? (
+                <video
+                  className="mediaEl"
+                  src={it.mediaSrc}
+                  playsInline
+                  muted
+                  loop
+                  autoPlay
+                  preload="metadata"
+                />
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img className="mediaEl" src={it.mediaSrc} alt={it.nombre} />
+              )
+            ) : (
+              <div className="mediaPh" aria-hidden="true" />
+            )}
+          </div>
+
+          <div className="body">
+            <div className="top">
+              <div className="title">{it.nombre}</div>
+              {it.precio ? <div className="price">{it.precio}</div> : null}
+            </div>
+            {it.descripcion ? (
+              <div className="desc">{it.descripcion}</div>
+            ) : null}
+          </div>
+        </div>
+      ))}
+
+      <style jsx>{`
+        .cardGrid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+          gap: 24px;
+        }
+
+        .card {
+          border-radius: 18px;
+          border: 1px solid rgba(0, 0, 0, 0.1);
+          background: #fafafa;
+          overflow: hidden;
+        }
+
+        .media {
+          width: 100%;
+          background: #eee;
+          position: relative;
+        }
+
+        .mediaEl {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+
+        .mediaPh {
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(
+            135deg,
+            rgba(0, 0, 0, 0.06),
+            rgba(0, 0, 0, 0.02)
+          );
+        }
+
+        .body {
+          padding: 12px 12px 14px;
+        }
+
+        .top {
+          display: flex;
+          align-items: baseline;
+          justify-content: space-between;
+          gap: 12px;
+        }
+
+        .title {
+          font-weight: 900;
+          color: rgba(0, 0, 0, 0.92);
+        }
+
+        .price {
+          font-weight: 900;
+          color: rgba(0, 0, 0, 0.72);
+          white-space: nowrap;
+        }
+
+        .desc {
+          margin-top: 6px;
+          font-size: 13px;
+          line-height: 1.5;
+          color: rgba(0, 0, 0, 0.76);
+        }
+      `}</style>
+    </div>
+  );
+}
+
 export default function CafePage() {
   const [active, setActive] = React.useState(CATS[0].id);
 
   // filtros (se muestran en el contenido, NO en el subnav)
-  const [beerFilter, setBeerFilter] = React.useState<BeerFilter>("Todas");
+  const [cervezaFilter, setCervezaFilter] =
+    React.useState<CervezaFilter>("Todas");
   const [coffeeFilter, setCoffeeFilter] = React.useState<CoffeeFilter>("Todos");
 
   // lock click vs observer
@@ -378,8 +514,8 @@ export default function CafePage() {
           id="cervezas"
           title="Cervezas"
           beers={cervezas}
-          filter={beerFilter}
-          onFilterChange={setBeerFilter}
+          filter={cervezaFilter}
+          onFilterChange={setCervezaFilter}
         />
         <MenuSectionReposteria id="reposteria" title="Panadería & Repostería" />
         <MenuSectionOtros id="otros" title="Otros" />
@@ -524,29 +660,100 @@ function MenuSectionCafes({
   filter: CoffeeFilter;
   onFilterChange: (v: CoffeeFilter) => void;
 }) {
-  const items = [
+  const items: Array<
+    MenuCardItem & {
+      tags: CoffeeTag[];
+    }
+  > = [
+    // Calientes
     {
-      name: "Espresso",
-      desc: "18 g · extracción europea · balance",
-      price: "$",
-      tags: ["Calientes"] as CoffeeFilter[],
+      nombre: "Espresso",
+      descripcion: "Intenso, directo y limpio.",
+      precio: formatCOP(7500),
+      tags: ["Calientes"],
     },
     {
-      name: "Americano",
-      desc: "espresso + agua · limpio",
-      price: "$",
-      tags: ["Calientes"] as CoffeeFilter[],
+      nombre: "Americano",
+      descripcion: "Más largo, misma esencia.",
+      precio: formatCOP(7500),
+      tags: ["Calientes"],
     },
     {
-      name: "Cappuccino",
-      desc: "textura fina · leche bien trabajada",
-      price: "$",
-      tags: ["Calientes", "Con leche"] as CoffeeFilter[],
+      nombre: "Latte",
+      descripcion: "Cremoso, balanceado.",
+      precio: formatCOP(9500),
+      tags: ["Calientes"],
+    },
+    {
+      nombre: "Capuchino",
+      descripcion: "Espuma firme, perfil clásico.",
+      precio: formatCOP(9500),
+      tags: ["Calientes"],
+    },
+    {
+      nombre: "Infusión de frutas",
+      descripcion: "Sin café: frutas e infusión caliente.",
+      precio: `Desde ${formatCOP(9500)}`,
+      tags: ["Calientes"],
+    },
+    {
+      nombre: "Copa de vino caliente",
+      descripcion: "Servicio caliente, ideal para clima frío.",
+      precio: "Consultar",
+      tags: ["Calientes"],
+    },
+
+    // Fríos
+    {
+      nombre: "Affogato",
+      descripcion: "Espresso + helado: postre y café.",
+      precio: "Consultar",
+      tags: ["Fríos"],
+    },
+    {
+      nombre: "Monumento Tonic",
+      descripcion: "Café + tónica: seco, cítrico y brillante.",
+      precio: "Consultar",
+      tags: ["Fríos"],
+    },
+
+    // Métodos
+    {
+      nombre: "V60",
+      descripcion: "Claridad y dulzor; taza limpia.",
+      precio: "Consultar",
+      tags: ["Métodos"],
+    },
+    {
+      nombre: "Chemex",
+      descripcion: "Taza suave y elegante; menos cuerpo.",
+      precio: "Consultar",
+      tags: ["Métodos"],
+    },
+    {
+      nombre: "Prensa francesa",
+      descripcion: "Más cuerpo y textura; perfil redondo.",
+      precio: "Consultar",
+      tags: ["Métodos"],
+    },
+    {
+      nombre: "Sifón belga",
+      descripcion: "Aromas altos y experiencia visual.",
+      precio: "Consultar",
+      tags: ["Métodos"],
+    },
+    {
+      nombre: "Cold drip",
+      descripcion: "Extracción lenta en frío; dulce y sedosa.",
+      precio: "Consultar",
+      tags: ["Métodos"],
     },
   ];
 
   const filtered =
-    filter === "Todos" ? items : items.filter((i) => i.tags.includes(filter));
+    filter === "Todos"
+      ? items
+      : items.filter((i) => i.tags.includes(filter as CoffeeTag));
 
   return (
     <SectionShell id={id}>
@@ -565,18 +772,28 @@ function MenuSectionCafes({
             </option>
           ))}
         </select>
+
+        <span className="count">
+          {filtered.length} {filtered.length === 1 ? "ítem" : "ítems"}
+        </span>
       </div>
 
       <div className="sectionBody">
-        <ListEditorial items={filtered.map(({ tags, ...r }) => r)} />
+        <MenuCardGrid items={filtered} mediaHeight={110} />
+
+        <div className="note">
+          <strong>Adición de licor:</strong> Baileys o Amaretto —{" "}
+          {formatCOP(7500)} el shot.
+        </div>
       </div>
 
       <style jsx>{`
         .sectionHeadRow {
           display: flex;
           align-items: center;
-          gap: 14px;
+          gap: 12px;
           margin: 0 0 12px;
+          flex-wrap: wrap;
         }
 
         .sectionHeadRow h2 {
@@ -601,8 +818,20 @@ function MenuSectionCafes({
           outline-offset: 2px;
         }
 
+        .count {
+          opacity: 0.7;
+          font-weight: 700;
+          font-size: 13px;
+        }
+
         .sectionBody {
           padding: 14px 0 8px;
+        }
+
+        .note {
+          margin-top: 12px;
+          opacity: 0.85;
+          font-size: 13px;
         }
       `}</style>
     </SectionShell>
@@ -618,14 +847,14 @@ function MenuSectionCervezas({
 }: {
   id: string;
   title: string;
-  filter: BeerFilter;
-  onFilterChange: (v: BeerFilter) => void;
+  filter: CervezaFilter;
+  onFilterChange: (v: CervezaFilter) => void;
   beers: Cerveza[];
 }) {
   const filtradas =
     filter === "Todas"
       ? beers
-      : beers.filter((b) => b.categorias.includes(filter as BeerCategory));
+      : beers.filter((b) => b.categorias.includes(filter as CervezaCategory));
 
   return (
     <SectionShell id={id}>
@@ -635,15 +864,19 @@ function MenuSectionCervezas({
         <select
           className="sectionFilter"
           value={filter}
-          onChange={(e) => onFilterChange(e.target.value as BeerFilter)}
+          onChange={(e) => onFilterChange(e.target.value as CervezaFilter)}
           aria-label="Filtrar cervezas"
         >
-          {beerFilters.map((f) => (
+          {cervezaFilters.map((f) => (
             <option key={f} value={f}>
               {f}
             </option>
           ))}
         </select>
+
+        <span className="count">
+          {filtradas.length} {filtradas.length === 1 ? "ítem" : "ítems"}
+        </span>
       </div>
 
       <div className="sectionBody">
@@ -658,8 +891,9 @@ function MenuSectionCervezas({
         .sectionHeadRow {
           display: flex;
           align-items: center;
-          gap: 14px;
+          gap: 12px;
           margin: 0 0 12px;
+          flex-wrap: wrap;
         }
 
         .sectionHeadRow h2 {
@@ -682,6 +916,12 @@ function MenuSectionCervezas({
         .sectionFilter:focus {
           outline: 2px solid rgba(200, 155, 82, 0.55);
           outline-offset: 2px;
+        }
+
+        .count {
+          opacity: 0.7;
+          font-weight: 700;
+          font-size: 13px;
         }
 
         .sectionBody {
@@ -699,33 +939,63 @@ function MenuSectionCervezas({
 }
 
 function MenuSectionReposteria({ id, title }: { id: string; title: string }) {
-  const items = [
-    { name: "Pandeyucas", desc: "recién hechos", price: "$" },
-    { name: "Palitos de queso", desc: "calientes", price: "$" },
-    { name: "Papas chips", desc: "crujientes", price: "$" },
+  const items: MenuCardItem[] = [
+    {
+      nombre: "Pandeyucas",
+      descripcion: "Recién hechos.",
+      precio: "Consultar",
+      // mediaSrc: "/menu/pandeyucas.webp",
+      // mediaType: "image",
+    },
+    {
+      nombre: "Palitos de queso",
+      descripcion: "Calientes.",
+      precio: "Consultar",
+      // mediaSrc: "/menu/palitos-queso.webp",
+      // mediaType: "image",
+    },
+    {
+      nombre: "Papas chips",
+      descripcion: "Crujientes.",
+      precio: "Consultar",
+      // mediaSrc: "/menu/papas-chips.webp",
+      // mediaType: "image",
+    },
   ];
 
   return (
     <SectionShell id={id}>
       <div className="sectionHeadRow">
         <h2>{title}</h2>
+
+        <span className="count">
+          {items.length} {items.length === 1 ? "ítem" : "ítems"}
+        </span>
       </div>
+
       <div className="sectionBody">
-        <ListEditorial items={items} />
+        <MenuCardGrid items={items} mediaHeight={110} />
       </div>
 
       <style jsx>{`
         .sectionHeadRow {
           display: flex;
           align-items: center;
-          gap: 14px;
+          gap: 12px;
           margin: 0 0 12px;
+          flex-wrap: wrap;
         }
 
         .sectionHeadRow h2 {
           margin: 0;
           font-size: 26px;
           letter-spacing: -0.2px;
+        }
+
+        .count {
+          opacity: 0.7;
+          font-weight: 700;
+          font-size: 13px;
         }
 
         .sectionBody {
@@ -737,16 +1007,20 @@ function MenuSectionReposteria({ id, title }: { id: string; title: string }) {
 }
 
 function MenuSectionOtros({ id, title }: { id: string; title: string }) {
-  const items = [
+  const items: MenuCardItem[] = [
     {
-      name: "Flights",
-      desc: "café / cerveza según disponibilidad",
-      price: "$",
+      nombre: "Flights",
+      descripcion: "Café / cerveza según disponibilidad.",
+      precio: "Consultar",
+      // mediaSrc: "/menu/flights.webp",
+      // mediaType: "image",
     },
     {
-      name: "Bebida de temporada",
-      desc: "pregunta por la rotación",
-      price: "$",
+      nombre: "Bebida de temporada",
+      descripcion: "Pregunta por la rotación.",
+      precio: "Consultar",
+      // mediaSrc: "/menu/temporada.webp",
+      // mediaType: "image",
     },
   ];
 
@@ -754,17 +1028,23 @@ function MenuSectionOtros({ id, title }: { id: string; title: string }) {
     <SectionShell id={id}>
       <div className="sectionHeadRow">
         <h2>{title}</h2>
+
+        <span className="count">
+          {items.length} {items.length === 1 ? "ítem" : "ítems"}
+        </span>
       </div>
+
       <div className="sectionBody">
-        <ListEditorial items={items} />
+        <MenuCardGrid items={items} mediaHeight={110} />
       </div>
 
       <style jsx>{`
         .sectionHeadRow {
           display: flex;
           align-items: center;
-          gap: 14px;
+          gap: 12px;
           margin: 0 0 12px;
+          flex-wrap: wrap;
         }
 
         .sectionHeadRow h2 {
@@ -773,65 +1053,16 @@ function MenuSectionOtros({ id, title }: { id: string; title: string }) {
           letter-spacing: -0.2px;
         }
 
+        .count {
+          opacity: 0.7;
+          font-weight: 700;
+          font-size: 13px;
+        }
+
         .sectionBody {
           padding: 14px 0 8px;
         }
       `}</style>
     </SectionShell>
-  );
-}
-
-function ListEditorial({
-  items,
-}: {
-  items: { name: string; desc?: string; price?: string }[];
-}) {
-  return (
-    <div className="list">
-      {items.map((it) => (
-        <div key={it.name} className="row">
-          <div className="left">
-            <div className="name">{it.name}</div>
-            {it.desc ? <div className="desc">{it.desc}</div> : null}
-          </div>
-          {it.price ? <div className="price">{it.price}</div> : null}
-        </div>
-      ))}
-
-      <style jsx>{`
-        .list {
-          display: grid;
-          gap: 10px;
-        }
-
-        .row {
-          display: grid;
-          grid-template-columns: 1fr auto;
-          gap: 12px;
-          padding: 12px 12px;
-          border-radius: 16px;
-          border: 1px solid rgba(0, 0, 0, 0.1);
-          background: #fafafa;
-        }
-
-        .name {
-          font-weight: 900;
-          color: rgba(0, 0, 0, 0.92);
-        }
-
-        .desc {
-          margin-top: 4px;
-          font-size: 13px;
-          line-height: 1.5;
-          color: rgba(0, 0, 0, 0.76);
-        }
-
-        .price {
-          align-self: center;
-          font-weight: 900;
-          color: rgba(0, 0, 0, 0.72);
-        }
-      `}</style>
-    </div>
   );
 }
