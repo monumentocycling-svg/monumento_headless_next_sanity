@@ -20,15 +20,18 @@ export function Nav() {
     <header className={styles.header}>
       <div className={styles.inner}>
         <Link href="/" className={styles.brand} aria-label="Monumento">
-          <Image
-            src="/logo.png"
-            alt="Monumento Taller Café"
-            width={1600}
-            height={450}
-            priority
-            quality={100}
-            className={styles.logo}
-          />
+          {/* Contenedor con proporción tipo “recuadro negro” */}
+          <span className={styles.logoBox}>
+            <Image
+              src="/logo.png"
+              alt="Monumento Taller Café"
+              fill
+              priority
+              quality={100}
+              sizes="(max-width: 640px) 210px, 320px"
+              className={styles.logo}
+            />
+          </span>
         </Link>
 
         <nav className={styles.nav} aria-label="Navegación principal">

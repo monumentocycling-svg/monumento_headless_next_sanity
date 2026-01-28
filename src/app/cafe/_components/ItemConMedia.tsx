@@ -13,6 +13,9 @@ type Props = {
   mediaHeight?: number; // px
 };
 
+const FALLBACK_POSTER = "/video-poster.webp";
+const FALLBACK_TEXT = "Imagen en preparación";
+
 export function ItemConMedia({
   nombre,
   estilo,
@@ -25,6 +28,7 @@ export function ItemConMedia({
   mediaHeight = 110,
 }: Props) {
   const fmt = new Intl.NumberFormat("es-CO");
+  const hasMedia = Boolean(mediaSrc);
 
   return (
     <div
@@ -35,19 +39,19 @@ export function ItemConMedia({
         background: "rgba(255,255,255,0.02)",
       }}
     >
-      {mediaSrc ? (
-        <div
-          style={{
-            width: "100%",
-            height: mediaHeight,
-            borderRadius: 10,
-            overflow: "hidden",
-            marginBottom: 12,
-            background: "rgba(255,255,255,0.04)",
-            position: "relative",
-          }}
-        >
-          {mediaType === "video" ? (
+      <div
+        style={{
+          width: "100%",
+          height: mediaHeight,
+          borderRadius: 10,
+          overflow: "hidden",
+          marginBottom: 12,
+          background: "rgba(255,255,255,0.04)",
+          position: "relative",
+        }}
+      >
+        {hasMedia ? (
+          mediaType === "video" ? (
             <video
               src={mediaSrc}
               autoPlay
@@ -55,7 +59,8 @@ export function ItemConMedia({
               muted
               playsInline
               preload="metadata"
-              poster="/video-poster.webp"
+              // CLAVE: si hay video real, NO solicitamos poster
+              poster={undefined}
               style={{
                 width: "100%",
                 height: "100%",
@@ -65,15 +70,51 @@ export function ItemConMedia({
             />
           ) : (
             <Image
-              src={mediaSrc}
+              src={mediaSrc!}
               alt={nombre}
               fill
               sizes="(max-width: 768px) 100vw, 420px"
               style={{ objectFit: "cover" }}
             />
-          )}
-        </div>
-      ) : null}
+          )
+        ) : (
+          <>
+            <Image
+              src={FALLBACK_POSTER}
+              alt={FALLBACK_TEXT}
+              fill
+              sizes="(max-width: 768px) 100vw, 420px"
+              style={{ objectFit: "cover" }}
+            />
+
+            {/* Overlay traslúcido + texto difuminado */}
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                display: "grid",
+                placeItems: "center",
+                background: "rgba(255,255,255,0.14)",
+                backdropFilter: "blur(2px)",
+              }}
+            >
+              <div
+                style={{
+                  fontWeight: 900,
+                  letterSpacing: 0.2,
+                  color: "rgba(0,0,0,0.45)",
+                  background: "rgba(255,255,255,0.55)",
+                  border: "1px solid rgba(0,0,0,0.08)",
+                  padding: "10px 14px",
+                  borderRadius: 999,
+                }}
+              >
+                {FALLBACK_TEXT}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
 
       <div
         style={{

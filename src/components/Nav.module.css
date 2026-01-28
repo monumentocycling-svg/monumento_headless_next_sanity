@@ -28,14 +28,23 @@
   display: inline-flex;
   align-items: center;
   min-width: 0; /* evita overflow raro */
+  text-decoration: none;
 }
 
-/* LOGO: grande pero con límite para no empujar la nav */
+/* ===== LOGO (control por "caja", no por height directo) =====
+   Esto asume que en Nav.tsx el logo está dentro de:
+   <span className={styles.logoBox}><Image fill ... /></span>
+*/
+.logoBox {
+  position: relative;
+  height: 52px; /* aprox “recuadro negro”: sube/baja aquí */
+  width: 360px; /* ancho aprox “recuadro negro” */
+  min-width: 220px;
+}
+
+/* El <Image fill> necesita object-fit */
 .logo {
-  display: block;
-  height: 96px; /* ← sube fuerte (antes 68) */
-  width: auto;
-  max-width: 680px; /* ← permite más ancho sin romper el nav */
+  object-fit: contain;
 }
 
 /* ===== NAV ===== */
@@ -98,8 +107,9 @@
     gap: 14px;
   }
 
-  .logo {
-    height: 60px;
-    max-width: 100%;
+  .logoBox {
+    height: 44px;
+    width: 260px;
+    min-width: 0;
   }
 }
