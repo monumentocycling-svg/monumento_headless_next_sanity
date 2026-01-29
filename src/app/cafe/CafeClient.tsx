@@ -13,9 +13,6 @@ const CATS: Cat[] = [
   { id: "otros", label: "Otros" },
 ];
 
-type CategoryId = Cat["id"];
-const CAT_IDS = new Set<CategoryId>(CATS.map((c) => c.id as CategoryId));
-
 // ===== Offsets para sticky + scroll =====
 const NAV_OFFSET = 64;
 const PAGE_HEADER_OFFSET = 132;
@@ -35,12 +32,27 @@ const cervezaFilters = [
 ] as const;
 
 type CervezaFilter = (typeof cervezaFilters)[number];
-type CervezaCategory = Exclude<CervezaFilter, "Todas">;
+type BeerCategory = Exclude<CervezaFilter, "Todas">;
 
 // ===== Filtros Cafés =====
 const coffeeFilters = ["Todos", "Calientes", "Fríos", "Métodos"] as const;
 type CoffeeFilter = (typeof coffeeFilters)[number];
 type CoffeeTag = Exclude<CoffeeFilter, "Todos">;
+
+const BEER_CATEGORIES: readonly BeerCategory[] = [
+  "Refrescantes",
+  "Saison",
+  "Lupuladas",
+  "Oscuras",
+  "Belgian Strong",
+  "Sour",
+] as const;
+
+function isBeerCategory(v: unknown): v is BeerCategory {
+  return (
+    typeof v === "string" && (BEER_CATEGORIES as readonly string[]).includes(v)
+  );
+}
 
 type MenuItem = {
   _id: string;
@@ -56,9 +68,11 @@ type MenuItem = {
   abv?: string;
   ibus?: number;
 
-  // normalizados
-  category?: string; // cafés
-  categories?: unknown; // cervezas (IDs)
+  // B1
+  coffeeCategory?: "Calientes" | "Fríos" | "Métodos";
+  beerCategories?: BeerCategory[];
+  foodCategory?: "Sal" | "Dulce";
+  otherCategory?: "Bebidas" | "Comidas";
 
   // media
   mediaSrc?: string;
@@ -205,7 +219,7 @@ export default function CafeClient({
       name: i.title,
       desc: i.description || "",
       price: i.priceCop != null ? formatCOP(i.priceCop) : i.priceText || "",
-      tags: [(i.category || "Calientes") as CoffeeTag],
+      tags: [(i.coffeeCategory || "Calientes") as CoffeeTag],
     }))
     .filter((i) => i.name);
 
@@ -218,12 +232,8 @@ export default function CafeClient({
     .slice()
     .sort((a, b) => (a.order ?? 100) - (b.order ?? 100))
     .map((i) => {
-      const cats: CategoryId[] = Array.isArray(i.categories)
-        ? i.categories.filter(
-            (c): c is CategoryId =>
-              typeof c === "string" && CAT_IDS.has(c as CategoryId),
-          )
-        : [];
+      const catsRaw = Array.isArray(i.beerCategories) ? i.beerCategories : [];
+      const categorias: BeerCategory[] = catsRaw.filter(isBeerCategory);
 
       return {
         nombre: i.title,
@@ -234,7 +244,7 @@ export default function CafeClient({
         descripcion: i.description || "",
         mediaSrc: pickMediaSrc(i),
         mediaType: inferMediaType(i),
-        categorias: cats,
+        categorias,
       };
     });
 
@@ -242,7 +252,7 @@ export default function CafeClient({
     cervezaFilter === "Todas"
       ? beerCards
       : beerCards.filter((b) =>
-          b.categorias.includes(cervezaFilter as CervezaCategory),
+          b.categorias.includes(cervezaFilter as BeerCategory),
         );
 
   return (
@@ -392,7 +402,6 @@ export default function CafeClient({
         </SectionShell>
       </div>
 
-      {/* Estilos locales (mantén los tuyos si ya los moviste a globals) */}
       <style jsx>{`
         .menuPage {
           padding: 10px 0 80px;

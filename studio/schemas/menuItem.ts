@@ -14,6 +14,13 @@ export default defineType({
     }),
 
     defineField({
+      name: "slug",
+      title: "Slug",
+      type: "slug",
+      options: { source: "title", maxLength: 96 },
+    }),
+
+    defineField({
       name: "section",
       title: "Sección",
       type: "string",
@@ -30,6 +37,13 @@ export default defineType({
     }),
 
     defineField({
+      name: "isActive",
+      title: "Activo (visible en la web)",
+      type: "boolean",
+      initialValue: true,
+    }),
+
+    defineField({
       name: "order",
       title: "Orden",
       type: "number",
@@ -43,6 +57,13 @@ export default defineType({
       rows: 3,
     }),
 
+    defineField({
+      name: "tags",
+      title: "Tags",
+      type: "array",
+      of: [{ type: "string" }],
+    }),
+
     // ---------- Precio ----------
     defineField({
       name: "priceCop",
@@ -52,7 +73,7 @@ export default defineType({
         "Ej: 17000. Para precios no fijos, déjalo vacío y usa priceText.",
       validation: (Rule) =>
         Rule.custom((value, ctx) => {
-          const d = ctx.document as any;
+          const d = ctx.document as { priceText?: string } | undefined;
           if (value == null && !d?.priceText) {
             return "Define priceCop o priceText (al menos uno).";
           }
@@ -67,16 +88,15 @@ export default defineType({
       description: 'Ej: "Consultar" o "Desde $9.500".',
       validation: (Rule) =>
         Rule.custom((value, ctx) => {
-          const d = ctx.document as any;
-          if (!value && d?.priceCop == null) {
+          const d = ctx.document as { priceCop?: number | null } | undefined;
+          if (!value && (d?.priceCop == null || d?.priceCop === undefined)) {
             return "Define priceCop o priceText (al menos uno).";
           }
           return true;
         }),
     }),
 
-    // ---------- Categorías ----------
-    // Café: Calientes/Fríos/Métodos
+    // ---------- Categorías por sección (B1) ----------
     defineField({
       name: "coffeeCategory",
       title: "Categoría café",
@@ -91,7 +111,6 @@ export default defineType({
       hidden: ({ document }) => document?.section !== "cafes",
     }),
 
-    // Cerveza: multi-categoría
     defineField({
       name: "beerCategories",
       title: "Categorías cerveza",
@@ -110,7 +129,33 @@ export default defineType({
       hidden: ({ document }) => document?.section !== "cervezas",
     }),
 
-    // Campos extra cerveza (opcionales)
+    defineField({
+      name: "foodCategory",
+      title: "Categoría repostería",
+      type: "string",
+      options: {
+        list: [
+          { title: "Sal", value: "Sal" },
+          { title: "Dulce", value: "Dulce" },
+        ],
+      },
+      hidden: ({ document }) => document?.section !== "reposteria",
+    }),
+
+    defineField({
+      name: "otherCategory",
+      title: "Categoría otros",
+      type: "string",
+      options: {
+        list: [
+          { title: "Bebidas", value: "Bebidas" },
+          { title: "Comidas", value: "Comidas" },
+        ],
+      },
+      hidden: ({ document }) => document?.section !== "otros",
+    }),
+
+    // ---------- Campos extra cerveza ----------
     defineField({
       name: "beerStyle",
       title: "Estilo",
@@ -131,11 +176,6 @@ export default defineType({
     }),
 
     // ---------- Media ----------
-    // NOTA: quitamos mediaType como “campo suelto” para evitar inconsistencias.
-    // El tipo se deduce por qué campo llenas:
-    // - mediaImage => imagen Sanity
-    // - mediaVideoUrl => video externo
-    // - mediaSrc => ruta local en /public (ej: /damaAlegre.mp4)
     defineField({
       name: "mediaImage",
       title: "Media (imagen)",
@@ -148,7 +188,7 @@ export default defineType({
       title: "Media (video URL externa)",
       type: "url",
       description:
-        "URL pública del video (mp4/webm). Si el video está en /public, usa mediaSrc.",
+        "URL pública del video. Si el video está en /public, usa mediaSrc.",
     }),
 
     defineField({
@@ -164,8 +204,14 @@ export default defineType({
       title: "Poster (opcional)",
       type: "image",
       options: { hotspot: true },
-      description:
-        "Si no hay media real, este poster puede ser el placeholder. Si lo dejas vacío, se usa el default del sitio.",
+    }),
+
+    // Legacy para evitar “Unknown fields found” en documentos viejos
+    defineField({
+      name: "category",
+      title: "Legacy: category",
+      type: "string",
+      hidden: true,
     }),
   ],
 
@@ -175,8 +221,9 @@ export default defineType({
       section: "section",
       media: "mediaImage",
       poster: "posterImage",
+      active: "isActive",
     },
-    prepare({ title, section, media, poster }) {
+    prepare({ title, section, media, poster, active }) {
       const s =
         section === "cafes"
           ? "Cafés"
@@ -185,7 +232,12 @@ export default defineType({
             : section === "reposteria"
               ? "Repostería"
               : "Otros";
-      return { title, subtitle: s, media: media || poster };
+      const status = active === false ? " (INACTIVO)" : "";
+      return {
+        title: `${title ?? ""}${status}`,
+        subtitle: s,
+        media: media || poster,
+      };
     },
   },
 });

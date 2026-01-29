@@ -36,7 +36,7 @@ type MenuItem = {
 const MENU_QUERY = /* groq */ `
 *[
   _type == "menuItem"
-  && (isActive != false)
+  && (isActive == true || !defined(isActive))
 ]{
   _id,
   title,
