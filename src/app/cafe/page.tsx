@@ -2,6 +2,9 @@
 import CafeClient from "./CafeClient";
 import { sanityClient } from "@/lib/sanityClient";
 
+// ISR: evita “snapshot vacío” en producción y actualiza el contenido
+export const revalidate = 60;
+
 type MenuItem = {
   _id: string;
   title: string;
@@ -46,7 +49,6 @@ const MENU_QUERY = /* groq */ `
   ibus,
 
   // NORMALIZACIÓN:
-  // - Para cafés: category sale de coffeeCategory si existe o de category si lo tienes
   "category": coalesce(coffeeCategory, category),
 
   // - Para cervezas: categories intenta beerCategories; si no, tags; si no, [category]
