@@ -1,8 +1,8 @@
+// src/app/cafe/CafeClient.tsx
 "use client";
 
 import React from "react";
 import { ItemConMedia } from "./_components/ItemConMedia";
-import { ItemCafeConMedia } from "./_components/ItemCafeConMedia";
 
 type Cat = { id: string; label: string };
 
@@ -39,42 +39,63 @@ const coffeeFilters = ["Todos", "Calientes", "Fríos", "Métodos"] as const;
 type CoffeeFilter = (typeof coffeeFilters)[number];
 type CoffeeTag = Exclude<CoffeeFilter, "Todos">;
 
-// ===== Tipos =====
-type CafeItem = {
-  nombre: string;
-  descripcion?: string;
-  precio?: number;
-  categoriaCafe?: CoffeeTag;
+type MenuItem = {
+  _id: string;
+  title: string;
+  section: "cafes" | "cervezas" | "reposteria" | "otros";
+  order?: number;
+  description?: string;
+  priceCop?: number;
+  priceText?: string;
+
+  // cerveza
+  beerStyle?: string;
+  abv?: string;
+  ibus?: number;
+
+  // normalizados
+  category?: string; // cafés
+  categories?: string[]; // cervezas
+
+  // media
   mediaSrc?: string;
-  mediaType?: "video" | "image";
+  mediaVideoUrl?: string;
+  mediaImageUrl?: string;
+  posterUrl?: string;
 };
 
-type CervezaItem = {
-  nombre: string;
-  estilo: string;
-  abv: string;
-  ibus: number;
-  descripcion: string;
-  precio: number;
-  categorias: Array<
-    | "Refrescantes"
-    | "Saison"
-    | "Lupuladas"
-    | "Oscuras"
-    | "Belgian Strong"
-    | "Sour"
-  >;
-  mediaSrc?: string;
-  mediaType: "video" | "image";
-};
+function formatCOP(n: number) {
+  const s = Math.round(n).toString();
+  const withDots = s.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  return `$${withDots}`;
+}
 
-type SimpleItem = {
-  nombre: string;
-  descripcion?: string;
-  precio?: number;
-  mediaSrc?: string;
-  mediaType?: "video" | "image";
-};
+function inferMediaType(i: MenuItem): "video" | "image" {
+  // Prioridad: videoUrl -> video
+  if (i.mediaVideoUrl) return "video";
+
+  // mediaSrc por extensión
+  const src = i.mediaSrc || "";
+  if (/\.(mp4|webm|mov)$/i.test(src)) return "video";
+  return "image";
+}
+
+function pickMediaSrc(i: MenuItem): string {
+  // Prioridad: videoUrl si existe
+  if (i.mediaVideoUrl) return i.mediaVideoUrl;
+
+  // Si tienes ruta local (/public) úsala
+  if (i.mediaSrc) return i.mediaSrc;
+
+  // Si subiste imagen a Sanity
+  if (i.mediaImageUrl) return i.mediaImageUrl;
+
+  // Poster si existe
+  if (i.posterUrl) return i.posterUrl;
+
+  // fallback
+  return "/video-poster.webp";
+}
 
 export default function CafeClient({
   cafes,
@@ -82,16 +103,19 @@ export default function CafeClient({
   reposteria,
   otros,
 }: {
-  cafes: CafeItem[];
-  cervezas: CervezaItem[];
-  reposteria: SimpleItem[];
-  otros: SimpleItem[];
+  cafes: MenuItem[];
+  cervezas: MenuItem[];
+  reposteria: MenuItem[];
+  otros: MenuItem[];
 }) {
   const [active, setActive] = React.useState(CATS[0].id);
+
+  // filtros
   const [cervezaFilter, setCervezaFilter] =
     React.useState<CervezaFilter>("Todas");
   const [coffeeFilter, setCoffeeFilter] = React.useState<CoffeeFilter>("Todos");
 
+  // lock click vs observer
   const lockRef = React.useRef(false);
   const targetIdRef = React.useRef<string | null>(null);
   const rafRef = React.useRef<number | null>(null);
@@ -116,6 +140,7 @@ export default function CafeClient({
         if (visible?.target?.id) setActive(visible.target.id);
       },
       {
+        root: null,
         rootMargin: `-${SCROLL_OFFSET}px 0px -55% 0px`,
         threshold: [0.12, 0.22, 0.35],
       },
@@ -125,29 +150,103 @@ export default function CafeClient({
     return () => io.disconnect();
   }, []);
 
+  function stopRaf() {
+    if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
+    rafRef.current = null;
+  }
+
+  function unlockWhenArrived() {
+    stopRaf();
+
+    const id = targetIdRef.current;
+    if (!id) {
+      lockRef.current = false;
+      return;
+    }
+
+    const el = document.getElementById(id);
+    if (!el) {
+      lockRef.current = false;
+      return;
+    }
+
+    const check = () => {
+      const rect = el.getBoundingClientRect();
+      const desiredTop = SCROLL_OFFSET;
+      const delta = rect.top - desiredTop;
+
+      if (Math.abs(delta) <= ARRIVAL_TOLERANCE) {
+        lockRef.current = false;
+        targetIdRef.current = null;
+        rafRef.current = null;
+        return;
+      }
+
+      rafRef.current = requestAnimationFrame(check);
+    };
+
+    rafRef.current = requestAnimationFrame(check);
+  }
+
   function goTo(id: string) {
     const el = document.getElementById(id);
     if (!el) return;
 
     setActive(id);
+
     lockRef.current = true;
     targetIdRef.current = id;
 
     el.scrollIntoView({ behavior: "smooth", block: "start" });
     history.replaceState(null, "", `#${id}`);
 
-    const check = () => {
-      const rect = el.getBoundingClientRect();
-      if (Math.abs(rect.top - SCROLL_OFFSET) <= ARRIVAL_TOLERANCE) {
-        lockRef.current = false;
-        targetIdRef.current = null;
-        return;
-      }
-      rafRef.current = requestAnimationFrame(check);
-    };
-
-    rafRef.current = requestAnimationFrame(check);
+    unlockWhenArrived();
   }
+
+  React.useEffect(() => () => stopRaf(), []);
+
+  // ===== Construcción de data para UI =====
+
+  const cafeItems = cafes
+    .slice()
+    .sort((a, b) => (a.order ?? 100) - (b.order ?? 100))
+    .map((i) => ({
+      name: i.title,
+      desc: i.description || "",
+      price: i.priceCop != null ? formatCOP(i.priceCop) : i.priceText || "",
+      tags: [(i.category || "Calientes") as CoffeeTag],
+    }))
+    .filter((i) => i.name);
+
+  const cafeFiltered =
+    coffeeFilter === "Todos"
+      ? cafeItems
+      : cafeItems.filter((i) => i.tags.includes(coffeeFilter as CoffeeTag));
+
+  const beerCards = cervezas
+    .slice()
+    .sort((a, b) => (a.order ?? 100) - (b.order ?? 100))
+    .map((i) => {
+      const cats = Array.isArray(i.categories) ? i.categories : [];
+      return {
+        nombre: i.title,
+        estilo: i.beerStyle || "",
+        abv: i.abv || "",
+        ibus: typeof i.ibus === "number" ? i.ibus : 0,
+        precio: i.priceCop ?? 0,
+        descripcion: i.description || "",
+        mediaSrc: pickMediaSrc(i),
+        mediaType: inferMediaType(i),
+        categorias: cats as any[],
+      };
+    });
+
+  const beersFiltered =
+    cervezaFilter === "Todas"
+      ? beerCards
+      : beerCards.filter((b) =>
+          b.categorias.includes(cervezaFilter as CervezaCategory),
+        );
 
   return (
     <section className="menuPage">
@@ -163,122 +262,287 @@ export default function CafeClient({
           </header>
         </div>
 
+        {/* Subnav */}
         <div className="menuTopbar">
           <div className="menuTopbarInner">
-            <nav className="menuCats">
-              {CATS.map((c) => (
-                <button
-                  key={c.id}
-                  className={`menuCat ${active === c.id ? "isActive" : ""}`}
-                  onClick={() => goTo(c.id)}
-                >
-                  {c.label}
-                </button>
-              ))}
+            <nav className="menuCats" aria-label="Categorías del menú">
+              {CATS.map((c) => {
+                const isActive = active === c.id;
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    className={`menuCat ${isActive ? "isActive" : ""}`}
+                    onClick={() => goTo(c.id)}
+                  >
+                    {c.label}
+                  </button>
+                );
+              })}
             </nav>
           </div>
         </div>
       </div>
 
+      {/* Contenido */}
       <div className="menuWrap">
-        {/* CAFÉS */}
         <SectionShell id="cafes">
           <div className="sectionHeadRow">
             <h2>Cafés</h2>
+
             <select
               className="sectionFilter"
               value={coffeeFilter}
               onChange={(e) => setCoffeeFilter(e.target.value as CoffeeFilter)}
+              aria-label="Filtrar cafés"
             >
               {coffeeFilters.map((f) => (
-                <option key={f}>{f}</option>
+                <option key={f} value={f}>
+                  {f}
+                </option>
               ))}
             </select>
+
+            <span className="count" aria-label="Cantidad de ítems">
+              {cafeFiltered.length}{" "}
+              {cafeFiltered.length === 1 ? "ítem" : "ítems"}
+            </span>
           </div>
 
-          <div className="grid">
-            {(coffeeFilter === "Todos"
-              ? cafes
-              : cafes.filter((c) => c.categoriaCafe === coffeeFilter)
-            ).map((i) => (
-              <ItemCafeConMedia
-                key={i.nombre}
-                nombre={i.nombre}
-                descripcion={i.descripcion}
-                precio={i.precio}
-                mediaSrc={i.mediaSrc}
-                mediaType={i.mediaType}
-                mediaHeight={110}
-              />
-            ))}
+          <div className="sectionBody">
+            <ListEditorial items={cafeFiltered} />
+            <div className="note">
+              <strong>Adición de licor:</strong> Baileys o Amaretto —{" "}
+              {formatCOP(7500)} el shot.
+            </div>
           </div>
         </SectionShell>
 
-        {/* CERVEZAS */}
         <SectionShell id="cervezas">
           <div className="sectionHeadRow">
             <h2>Cervezas</h2>
+
             <select
               className="sectionFilter"
               value={cervezaFilter}
               onChange={(e) =>
                 setCervezaFilter(e.target.value as CervezaFilter)
               }
+              aria-label="Filtrar cervezas"
             >
               {cervezaFilters.map((f) => (
-                <option key={f}>{f}</option>
+                <option key={f} value={f}>
+                  {f}
+                </option>
               ))}
             </select>
+
+            <span className="count" aria-label="Cantidad de ítems">
+              {beersFiltered.length}{" "}
+              {beersFiltered.length === 1 ? "ítem" : "ítems"}
+            </span>
           </div>
 
-          <div className="grid">
-            {(cervezaFilter === "Todas"
-              ? cervezas
-              : cervezas.filter((b) =>
-                  b.categorias.includes(cervezaFilter as CervezaCategory),
-                )
-            ).map((c) => (
-              <ItemConMedia key={c.nombre} {...c} mediaHeight={110} />
-            ))}
+          <div className="sectionBody">
+            <div className="beerGrid">
+              {beersFiltered.map((c) => (
+                <ItemConMedia key={c.nombre} {...c} mediaHeight={110} />
+              ))}
+            </div>
           </div>
         </SectionShell>
 
-        {/* REPOSTERÍA */}
         <SectionShell id="reposteria">
-          <h2>Panadería & Repostería</h2>
-          <div className="grid">
-            {reposteria.map((i) => (
-              <ItemCafeConMedia
-                key={i.nombre}
-                nombre={i.nombre}
-                descripcion={i.descripcion}
-                precio={i.precio}
-                mediaSrc={i.mediaSrc}
-                mediaType={i.mediaType}
-                mediaHeight={110}
-              />
-            ))}
+          <div className="sectionHeadRow">
+            <h2>Panadería & Repostería</h2>
+          </div>
+          <div className="sectionBody">
+            <ListEditorial
+              items={reposteria
+                .slice()
+                .sort((a, b) => (a.order ?? 100) - (b.order ?? 100))
+                .map((i) => ({
+                  name: i.title,
+                  desc: i.description || "",
+                  price:
+                    i.priceCop != null
+                      ? formatCOP(i.priceCop)
+                      : i.priceText || "Consultar",
+                }))}
+            />
           </div>
         </SectionShell>
 
-        {/* OTROS */}
         <SectionShell id="otros">
-          <h2>Otros</h2>
-          <div className="grid">
-            {otros.map((i) => (
-              <ItemCafeConMedia
-                key={i.nombre}
-                nombre={i.nombre}
-                descripcion={i.descripcion}
-                precio={i.precio}
-                mediaSrc={i.mediaSrc}
-                mediaType={i.mediaType}
-                mediaHeight={110}
-              />
-            ))}
+          <div className="sectionHeadRow">
+            <h2>Otros</h2>
+          </div>
+          <div className="sectionBody">
+            <ListEditorial
+              items={otros
+                .slice()
+                .sort((a, b) => (a.order ?? 100) - (b.order ?? 100))
+                .map((i) => ({
+                  name: i.title,
+                  desc: i.description || "",
+                  price:
+                    i.priceCop != null
+                      ? formatCOP(i.priceCop)
+                      : i.priceText || "Consultar",
+                }))}
+            />
           </div>
         </SectionShell>
       </div>
+
+      {/* Estilos locales (mantén los tuyos si ya los moviste a globals) */}
+      <style jsx>{`
+        .menuPage {
+          padding: 10px 0 80px;
+        }
+
+        .menuWrap {
+          max-width: 1100px;
+          margin: 0 auto;
+          padding: 0 20px;
+        }
+
+        .stickyStack {
+          position: sticky;
+          top: ${NAV_OFFSET}px;
+          z-index: 40;
+          background: #fff;
+          isolation: isolate;
+          border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .menuHeader {
+          padding: 16px 0 10px;
+        }
+        .menuHeader h1 {
+          margin: 0;
+          font-size: clamp(28px, 3.2vw, 44px);
+          letter-spacing: -0.4px;
+        }
+        .menuHeader p {
+          margin: 10px 0 0;
+          max-width: 780px;
+          line-height: 1.55;
+          color: rgba(0, 0, 0, 0.78);
+        }
+
+        .menuTopbar {
+          position: relative;
+          z-index: 30;
+          background: #ffffff;
+          border-top: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .menuTopbarInner {
+          max-width: 1100px;
+          margin: 0 auto;
+          padding: 12px 20px;
+          background: #fff;
+        }
+
+        .menuCats {
+          display: flex;
+          align-items: center;
+          gap: 20px;
+          flex-wrap: wrap;
+        }
+
+        .menuCat {
+          appearance: none;
+          background: transparent;
+          border: 0;
+          padding: 6px 2px;
+          cursor: pointer;
+          font-weight: 800;
+          font-size: 14px;
+          letter-spacing: 0.2px;
+          color: rgba(0, 0, 0, 0.82);
+          position: relative;
+          transition: color 160ms ease;
+        }
+
+        .menuCat::after {
+          content: "";
+          position: absolute;
+          left: 0;
+          bottom: -6px;
+          height: 2px;
+          width: 100%;
+          background: var(--mmt-gold, rgba(200, 155, 82, 0.95));
+          transform: scaleX(0);
+          transform-origin: left;
+          transition: transform 180ms ease;
+        }
+
+        .menuCat:hover {
+          color: rgba(0, 0, 0, 0.95);
+        }
+
+        .menuCat.isActive {
+          color: rgba(0, 0, 0, 0.95);
+        }
+
+        .menuCat.isActive::after {
+          transform: scaleX(1);
+        }
+
+        .sectionHeadRow {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin: 0 0 12px;
+          flex-wrap: wrap;
+        }
+
+        .sectionHeadRow h2 {
+          margin: 0;
+          font-size: 26px;
+          letter-spacing: -0.2px;
+        }
+
+        .sectionFilter {
+          font: inherit;
+          font-size: 13px;
+          font-weight: 700;
+          padding: 6px 10px;
+          border-radius: 999px;
+          border: 1px solid rgba(0, 0, 0, 0.18);
+          background: #fff;
+          cursor: pointer;
+        }
+
+        .sectionFilter:focus {
+          outline: 2px solid rgba(200, 155, 82, 0.55);
+          outline-offset: 2px;
+        }
+
+        .count {
+          opacity: 0.7;
+          font-weight: 700;
+          font-size: 13px;
+        }
+
+        .sectionBody {
+          padding: 14px 0 8px;
+        }
+
+        .note {
+          margin-top: 12px;
+          opacity: 0.85;
+          font-size: 13px;
+        }
+
+        .beerGrid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+          gap: 24px;
+        }
+      `}</style>
     </section>
   );
 }
@@ -291,8 +555,69 @@ function SectionShell({
   children: React.ReactNode;
 }) {
   return (
-    <section id={id} style={{ scrollMarginTop: SCROLL_OFFSET }}>
+    <section id={id} className="menuSection">
       {children}
+
+      <style jsx>{`
+        .menuSection {
+          scroll-margin-top: ${SCROLL_OFFSET}px;
+          padding: 18px 0 8px;
+          border-top: 1px solid rgba(0, 0, 0, 0.08);
+        }
+      `}</style>
     </section>
+  );
+}
+
+function ListEditorial<
+  T extends { name: string; desc?: string; price?: string },
+>({ items }: { items: T[] }) {
+  return (
+    <div className="list">
+      {items.map((it) => (
+        <div key={it.name} className="row">
+          <div className="left">
+            <div className="name">{it.name}</div>
+            {it.desc ? <div className="desc">{it.desc}</div> : null}
+          </div>
+          {it.price ? <div className="price">{it.price}</div> : null}
+        </div>
+      ))}
+
+      <style jsx>{`
+        .list {
+          display: grid;
+          gap: 10px;
+        }
+
+        .row {
+          display: grid;
+          grid-template-columns: 1fr auto;
+          gap: 12px;
+          padding: 12px 12px;
+          border-radius: 16px;
+          border: 1px solid rgba(0, 0, 0, 0.1);
+          background: #fafafa;
+        }
+
+        .name {
+          font-weight: 900;
+          color: rgba(0, 0, 0, 0.92);
+        }
+
+        .desc {
+          margin-top: 4px;
+          font-size: 13px;
+          line-height: 1.5;
+          color: rgba(0, 0, 0, 0.76);
+        }
+
+        .price {
+          align-self: center;
+          font-weight: 900;
+          color: rgba(0, 0, 0, 0.72);
+        }
+      `}</style>
+    </div>
   );
 }

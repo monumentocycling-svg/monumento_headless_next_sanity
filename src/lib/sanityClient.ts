@@ -18,4 +18,5 @@ export const sanityClient = createClient({
   dataset,
   apiVersion,
   useCdn: false, // IMPORTANTE para datos frescos en menú
+  token: process.env.SANITY_API_TOKEN, // <-- solo funciona en server components
 });

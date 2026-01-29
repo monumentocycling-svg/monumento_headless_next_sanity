@@ -9,7 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@sanity/client": "^6.24.1",
     "@sanity/image-url": "^1.2.0",
     "@sanity/ui": "^2.16.7",
     "next": "14.2.35",
@@ -19,9 +18,11 @@
     "sanity": "^3.99.0"
   },
   "devDependencies": {
+    "@sanity/client": "^7.14.1",
     "@types/node": "20.17.6",
     "@types/react": "18.3.12",
     "@types/react-dom": "18.3.1",
+    "dotenv": "^17.2.3",
     "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.35",
     "typescript": "5.9.3"

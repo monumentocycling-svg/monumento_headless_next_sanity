@@ -50,6 +50,14 @@ export default defineType({
       type: "number",
       description:
         "Ej: 17000. Para precios no fijos, déjalo vacío y usa priceText.",
+      validation: (Rule) =>
+        Rule.custom((value, ctx) => {
+          const d = ctx.document as any;
+          if (value == null && !d?.priceText) {
+            return "Define priceCop o priceText (al menos uno).";
+          }
+          return true;
+        }),
     }),
 
     defineField({
@@ -57,6 +65,14 @@ export default defineType({
       title: "Precio (texto)",
       type: "string",
       description: 'Ej: "Consultar" o "Desde $9.500".',
+      validation: (Rule) =>
+        Rule.custom((value, ctx) => {
+          const d = ctx.document as any;
+          if (!value && d?.priceCop == null) {
+            return "Define priceCop o priceText (al menos uno).";
+          }
+          return true;
+        }),
     }),
 
     // ---------- Categorías ----------
@@ -75,7 +91,7 @@ export default defineType({
       hidden: ({ document }) => document?.section !== "cafes",
     }),
 
-    // Cerveza: Refrescantes/Saison/Lupuladas/Oscuras/Belgian Strong/Sour
+    // Cerveza: multi-categoría
     defineField({
       name: "beerCategories",
       title: "Categorías cerveza",
@@ -115,35 +131,32 @@ export default defineType({
     }),
 
     // ---------- Media ----------
-    defineField({
-      name: "mediaType",
-      title: "Media tipo",
-      type: "string",
-      options: {
-        list: [
-          { title: "Imagen", value: "image" },
-          { title: "Video", value: "video" },
-        ],
-        layout: "radio",
-      },
-      initialValue: "image",
-    }),
-
+    // NOTA: quitamos mediaType como “campo suelto” para evitar inconsistencias.
+    // El tipo se deduce por qué campo llenas:
+    // - mediaImage => imagen Sanity
+    // - mediaVideoUrl => video externo
+    // - mediaSrc => ruta local en /public (ej: /damaAlegre.mp4)
     defineField({
       name: "mediaImage",
       title: "Media (imagen)",
       type: "image",
       options: { hotspot: true },
-      hidden: ({ document }) => document?.mediaType !== "image",
     }),
 
     defineField({
       name: "mediaVideoUrl",
-      title: "Media (video URL)",
+      title: "Media (video URL externa)",
       type: "url",
       description:
-        "URL pública del video (mp4/webm). Por ahora úsalo como enlace directo; más adelante podemos subir a CDN.",
-      hidden: ({ document }) => document?.mediaType !== "video",
+        "URL pública del video (mp4/webm). Si el video está en /public, usa mediaSrc.",
+    }),
+
+    defineField({
+      name: "mediaSrc",
+      title: "Media (ruta local /public)",
+      type: "string",
+      description:
+        "Ruta local desde /public. Ej: /damaAlegre.mp4 o /laValiente.webp",
     }),
 
     defineField({
@@ -152,7 +165,7 @@ export default defineType({
       type: "image",
       options: { hotspot: true },
       description:
-        "Si no hay media real, este poster puede ser el placeholder específico del ítem. Si lo dejas vacío, se usa /video-poster.webp.",
+        "Si no hay media real, este poster puede ser el placeholder. Si lo dejas vacío, se usa el default del sitio.",
     }),
   ],
 
@@ -161,8 +174,9 @@ export default defineType({
       title: "title",
       section: "section",
       media: "mediaImage",
+      poster: "posterImage",
     },
-    prepare({ title, section }) {
+    prepare({ title, section, media, poster }) {
       const s =
         section === "cafes"
           ? "Cafés"
@@ -171,7 +185,7 @@ export default defineType({
             : section === "reposteria"
               ? "Repostería"
               : "Otros";
-      return { title, subtitle: s };
+      return { title, subtitle: s, media: media || poster };
     },
   },
 });

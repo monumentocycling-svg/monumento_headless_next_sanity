@@ -1,0 +1,274 @@
+{
+  "cafes": [
+    {
+      "title": "Espresso",
+      "category": "Calientes",
+      "description": "Intenso, directo y limpio.",
+      "priceCop": 7500
+    },
+    {
+      "title": "Americano",
+      "category": "Calientes",
+      "description": "Más largo, misma esencia.",
+      "priceCop": 7500
+    },
+    {
+      "title": "Latte",
+      "category": "Calientes",
+      "description": "Cremoso, balanceado.",
+      "priceCop": 9500
+    },
+    {
+      "title": "Capuchino",
+      "category": "Calientes",
+      "description": "Espuma firme, perfil clásico.",
+      "priceCop": 9500
+    },
+    {
+      "title": "Infusión de frutas",
+      "category": "Calientes",
+      "description": "Sin café: frutas e infusión caliente.",
+      "priceText": "Desde $9.500"
+    },
+    {
+      "title": "Copa de vino caliente",
+      "category": "Calientes",
+      "description": "Servicio caliente, ideal para clima frío.",
+      "priceText": "Consultar"
+    },
+    {
+      "title": "Affogato",
+      "category": "Fríos",
+      "description": "Espresso + helado: postre y café.",
+      "priceText": "Consultar"
+    },
+    {
+      "title": "Monumento Tonic",
+      "category": "Fríos",
+      "description": "Café + tónica: seco, cítrico y brillante.",
+      "priceText": "Consultar"
+    },
+    {
+      "title": "V60",
+      "category": "Métodos",
+      "description": "Claridad y dulzor; taza limpia.",
+      "priceText": "Consultar"
+    },
+    {
+      "title": "Chemex",
+      "category": "Métodos",
+      "description": "Taza suave y elegante; menos cuerpo.",
+      "priceText": "Consultar"
+    },
+    {
+      "title": "Prensa francesa",
+      "category": "Métodos",
+      "description": "Más cuerpo y textura; perfil redondo.",
+      "priceText": "Consultar"
+    },
+    {
+      "title": "Sifón belga",
+      "category": "Métodos",
+      "description": "Aromas altos y experiencia visual.",
+      "priceText": "Consultar"
+    },
+    {
+      "title": "Cold drip",
+      "category": "Métodos",
+      "description": "Extracción lenta en frío; dulce y sedosa.",
+      "priceText": "Consultar"
+    }
+  ],
+  "cervezas": [
+    {
+      "title": "La Germana Olvidada",
+      "category": "Refrescantes",
+      "beerStyle": "Gose",
+      "abv": "5%",
+      "ibus": 5,
+      "priceCop": 17000,
+      "description": "Rubia alemana de tradición milenaria. Refrescante, cítrica, con coriandro y un toque salino.",
+      "mediaType": "video",
+      "mediaSrc": "/germanaOlvidada.mp4",
+      "tags": ["Refrescantes"]
+    },
+    {
+      "title": "La Valiente",
+      "category": "Refrescantes",
+      "beerStyle": "Witbier",
+      "abv": "5%",
+      "ibus": 13,
+      "priceCop": 17000,
+      "description": "Trigo con naranja, coriandro, pimienta y un toque de vainilla. Bomba aromática y muy fácil.",
+      "mediaType": "image",
+      "mediaSrc": "/laValiente.webp",
+      "tags": ["Refrescantes"]
+    },
+    {
+      "title": "El Gregario",
+      "category": "Refrescantes",
+      "beerStyle": "Belgian Single",
+      "abv": "5.5%",
+      "ibus": 27,
+      "priceCop": 17000,
+      "description": "Clara, chispeante y fácil de tomar. Especiada, frutal y seca: compañera de ruta.",
+      "mediaType": "video",
+      "mediaSrc": "/gregario.mp4",
+      "tags": ["Refrescantes", "Belgian Strong"]
+    },
+    {
+      "title": "La Justa",
+      "category": "Saison",
+      "beerStyle": "Hoppy Saison",
+      "abv": "6%",
+      "ibus": 25,
+      "priceCop": 17000,
+      "description": "Saison rubia y tomable con lúpulo americano. Fenoles belgas + toque moderno.",
+      "mediaType": "video",
+      "mediaSrc": "/justa.mp4",
+      "tags": ["Saison"]
+    },
+    {
+      "title": "La Provinciana",
+      "category": "Saison",
+      "beerStyle": "French Saison",
+      "abv": "6.5%",
+      "ibus": 27,
+      "priceCop": 17000,
+      "description": "Cerveza de granja: seca, rústica y especiada. Frutal, cítrica y con amargo medio.",
+      "mediaType": "video",
+      "mediaSrc": "/provinciana.mp4",
+      "tags": ["Saison"]
+    },
+    {
+      "title": "El Prejuicio",
+      "category": "Saison",
+      "beerStyle": "Black Saison",
+      "abv": "6%",
+      "ibus": 20,
+      "priceCop": 17000,
+      "description": "Ligera y chispeante, notas herbales sutiles. Oscura en color, refrescante en boca.",
+      "mediaType": "image",
+      "mediaSrc": "/prejuicio.webp",
+      "tags": ["Saison"]
+    },
+    {
+      "title": "El Niño Sin Padre",
+      "category": "Lupuladas",
+      "beerStyle": "IPA",
+      "abv": "5.5%",
+      "ibus": 61,
+      "priceCop": 17000,
+      "description": "Amarga y muy aromática. Notas frutales (maracuyá, durazno, mango) y cítricos. (No esperes siempre la misma).",
+      "mediaType": "video",
+      "mediaSrc": "/ninoSinPadre.mp4",
+      "tags": ["Lupuladas"]
+    },
+    {
+      "title": "Medianoche en Brujas",
+      "category": "Oscuras",
+      "beerStyle": "Belgian Stout",
+      "abv": "7%",
+      "ibus": 39,
+      "priceCop": 17000,
+      "description": "Oscura por maltas chocolate y tostadas; final redondeado con panelita.",
+      "mediaType": "video",
+      "mediaSrc": "/mediaNocheEnBrujas.mp4",
+      "tags": ["Oscuras"]
+    },
+    {
+      "title": "La Bruja",
+      "category": "Belgian Strong",
+      "beerStyle": "Belgian Dubbel",
+      "abv": "7%",
+      "ibus": 19,
+      "priceCop": 17000,
+      "description": "Cobriza profunda y compleja. Balance a malta y sirope belga: caramelo seco, ciruelas y frutas secas.",
+      "mediaType": "video",
+      "mediaSrc": "/laBruja.mp4",
+      "tags": ["Belgian Strong"]
+    },
+    {
+      "title": "El Rey de Palmas",
+      "category": "Belgian Strong",
+      "beerStyle": "Belgian Golden Strong",
+      "abv": "8%",
+      "ibus": 23,
+      "priceCop": 17000,
+      "description": "Rubia fuerte: pera y durazno, especiada con jengibre fresco y pimienta africana.",
+      "mediaType": "video",
+      "mediaSrc": "/reyDePalmas.mp4",
+      "tags": ["Belgian Strong"]
+    },
+    {
+      "title": "La Dama Alegre",
+      "category": "Belgian Strong",
+      "beerStyle": "Belgian Tripel",
+      "abv": "9%",
+      "ibus": 21,
+      "priceCop": 17000,
+      "description": "Rubia fuerte y especiada: cilantro, anís y cáscara de naranja. Tradición trapense con actitud.",
+      "mediaType": "video",
+      "mediaSrc": "/damaAlegre.mp4",
+      "tags": ["Belgian Strong"]
+    },
+    {
+      "title": "El Pedalista",
+      "category": "Oscuras",
+      "beerStyle": "Belgian Quadrupel",
+      "abv": "10%",
+      "ibus": 25,
+      "priceCop": 18000,
+      "description": "Cobre oscura, casi negra. Sirope belga (sin ser dulce), ciruelas, higos y frutas oscuras deshidratadas.",
+      "mediaType": "video",
+      "mediaSrc": "/pedalista.mp4",
+      "tags": ["Oscuras", "Belgian Strong"]
+    },
+    {
+      "title": "La Diva",
+      "category": "Sour",
+      "beerStyle": "Fruited Sour Ale",
+      "abv": "4.5%",
+      "ibus": 15,
+      "priceCop": 17000,
+      "description": "Ácida y frutal. Enriquecida con fruta fresca (cambia por temporada).",
+      "mediaType": "video",
+      "mediaSrc": "/diva.mp4",
+      "tags": ["Sour"]
+    }
+  ],
+  "reposteria": [
+    {
+      "title": "Pandeyucas",
+      "category": "Panadería & Repostería",
+      "description": "Recién hechos.",
+      "priceText": "Consultar"
+    },
+    {
+      "title": "Palitos de queso",
+      "category": "Panadería & Repostería",
+      "description": "Calientes.",
+      "priceText": "Consultar"
+    },
+    {
+      "title": "Papas chips",
+      "category": "Panadería & Repostería",
+      "description": "Crujientes.",
+      "priceText": "Consultar"
+    }
+  ],
+  "otros": [
+    {
+      "title": "Flights",
+      "category": "Otros",
+      "description": "Café / cerveza según disponibilidad.",
+      "priceText": "Consultar"
+    },
+    {
+      "title": "Bebida de temporada",
+      "category": "Otros",
+      "description": "Pregunta por la rotación.",
+      "priceText": "Consultar"
+    }
+  ]
+}

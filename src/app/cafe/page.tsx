@@ -1,156 +1,73 @@
-// FILE: src/app/cafe/page.tsx
+// src/app/cafe/page.tsx
 import CafeClient from "./CafeClient";
-import { sanityFetch } from "@/sanity/lib/live";
-import { client } from "@/sanity/lib/client";
-import imageUrlBuilder from "@sanity/image-url";
-import type { SanityImageSource } from "@sanity/image-url/lib/types/types";
+import { sanityClient } from "@/lib/sanityClient";
 
-const builder = imageUrlBuilder(client);
-
-function urlFor(source: SanityImageSource) {
-  return builder.image(source).width(1200).quality(80).auto("format").url();
-}
-
-type MenuItemDoc = {
+type MenuItem = {
   _id: string;
   title: string;
   section: "cafes" | "cervezas" | "reposteria" | "otros";
   order?: number;
   description?: string;
-
   priceCop?: number;
   priceText?: string;
 
-  coffeeCategory?: "Calientes" | "Fríos" | "Métodos";
-
-  beerCategories?: Array<
-    | "Refrescantes"
-    | "Saison"
-    | "Lupuladas"
-    | "Oscuras"
-    | "Belgian Strong"
-    | "Sour"
-  >;
+  // cervezas
   beerStyle?: string;
   abv?: string;
   ibus?: number;
 
-  mediaType?: "image" | "video";
-  mediaImage?: SanityImageSource;
+  // categorías normalizadas
+  category?: string; // café: Calientes/Fríos/Métodos
+  categories?: string[]; // cerveza: multi-categoría
+
+  // media
+  mediaSrc?: string;
   mediaVideoUrl?: string;
-  posterImage?: SanityImageSource;
+  mediaImageUrl?: string;
+  posterUrl?: string;
 };
 
+const MENU_QUERY = /* groq */ `
+*[
+  _type == "menuItem"
+  && (isActive != false)
+]{
+  _id,
+  title,
+  section,
+  order,
+  description,
+  priceCop,
+  priceText,
+
+  // cerveza
+  beerStyle,
+  abv,
+  ibus,
+
+  // NORMALIZACIÓN:
+  // - Para cafés: category sale de coffeeCategory si existe o de category si lo tienes
+  "category": coalesce(coffeeCategory, category),
+
+  // - Para cervezas: categories intenta beerCategories; si no, tags; si no, [category]
+  "categories": coalesce(beerCategories, tags, select(defined(category) => [category], [])),
+
+  // media
+  mediaSrc,
+  mediaVideoUrl,
+  "mediaImageUrl": mediaImage.asset->url,
+  "posterUrl": posterImage.asset->url
+}
+| order(section asc, order asc, title asc)
+`;
+
 export default async function CafePage() {
-  const query = `*[_type == "menuItem"]|order(section asc, order asc, title asc){
-    _id,
-    title,
-    section,
-    order,
-    description,
-    priceCop,
-    priceText,
-    coffeeCategory,
-    beerCategories,
-    beerStyle,
-    abv,
-    ibus,
-    mediaType,
-    mediaImage,
-    mediaVideoUrl,
-    posterImage
-  }`;
+  const items: MenuItem[] = await sanityClient.fetch(MENU_QUERY);
 
-  const res = await sanityFetch({ query });
-  const data = res.data as MenuItemDoc[];
-
-  const cafes = data
-    .filter((d) => d.section === "cafes")
-    .map((d) => {
-      const mt: "video" | "image" = d.mediaType === "video" ? "video" : "image";
-
-      return {
-        nombre: d.title,
-        descripcion: d.description,
-        precio: d.priceCop,
-        precioTexto: d.priceText,
-        categoriaCafe: d.coffeeCategory,
-        mediaType: mt,
-        mediaSrc:
-          mt === "video"
-            ? d.mediaVideoUrl
-            : d.mediaImage
-              ? urlFor(d.mediaImage)
-              : undefined,
-        posterSrc: d.posterImage ? urlFor(d.posterImage) : undefined,
-      };
-    });
-
-  const cervezas = data
-    .filter((d) => d.section === "cervezas")
-    .map((d) => {
-      const mt: "video" | "image" = d.mediaType === "video" ? "video" : "image";
-
-      return {
-        nombre: d.title,
-        estilo: d.beerStyle ?? "",
-        abv: d.abv ?? "",
-        ibus: d.ibus ?? 0,
-        descripcion: d.description ?? "",
-        precio: d.priceCop ?? 0,
-        categorias: d.beerCategories ?? [],
-        mediaType: mt,
-        mediaSrc:
-          mt === "video"
-            ? d.mediaVideoUrl
-            : d.mediaImage
-              ? urlFor(d.mediaImage)
-              : undefined,
-        posterSrc: d.posterImage ? urlFor(d.posterImage) : undefined,
-      };
-    });
-
-  const reposteria = data
-    .filter((d) => d.section === "reposteria")
-    .map((d) => {
-      const mt: "video" | "image" = d.mediaType === "video" ? "video" : "image";
-
-      return {
-        nombre: d.title,
-        descripcion: d.description,
-        precio: d.priceCop,
-        precioTexto: d.priceText,
-        mediaType: mt,
-        mediaSrc:
-          mt === "video"
-            ? d.mediaVideoUrl
-            : d.mediaImage
-              ? urlFor(d.mediaImage)
-              : undefined,
-        posterSrc: d.posterImage ? urlFor(d.posterImage) : undefined,
-      };
-    });
-
-  const otros = data
-    .filter((d) => d.section === "otros")
-    .map((d) => {
-      const mt: "video" | "image" = d.mediaType === "video" ? "video" : "image";
-
-      return {
-        nombre: d.title,
-        descripcion: d.description,
-        precio: d.priceCop,
-        precioTexto: d.priceText,
-        mediaType: mt,
-        mediaSrc:
-          mt === "video"
-            ? d.mediaVideoUrl
-            : d.mediaImage
-              ? urlFor(d.mediaImage)
-              : undefined,
-        posterSrc: d.posterImage ? urlFor(d.posterImage) : undefined,
-      };
-    });
+  const cafes = items.filter((i) => i.section === "cafes");
+  const cervezas = items.filter((i) => i.section === "cervezas");
+  const reposteria = items.filter((i) => i.section === "reposteria");
+  const otros = items.filter((i) => i.section === "otros");
 
   return (
     <CafeClient

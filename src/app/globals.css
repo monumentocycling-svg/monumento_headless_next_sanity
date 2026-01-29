@@ -1,14 +1,21 @@
 :root {
   color-scheme: light;
 
-  --mmt-ink: rgba(0, 0, 0, 0.92);
-  --mmt-ink-soft: rgba(0, 0, 0, 0.72);
-  --mmt-line: rgba(0, 0, 0, 0.1);
+  /* Identidad Monumento */
+  --mmt-ink: rgba(0, 0, 0, 0.95);
+  --mmt-ink-base: rgba(0, 0, 0, 0.78);
+  --mmt-line: rgba(0, 0, 0, 0.12);
 
+  /* Dorado café (mismo del header) */
   --mmt-gold: rgba(200, 155, 82, 0.95);
-  --mmt-gold-soft: rgba(200, 155, 82, 0.35);
 
-  scroll-padding-top: 140px; /* ajusta según header */
+  /* Tipografía navegación (idéntica al header) */
+  --mmt-nav-size: 14px;
+  --mmt-nav-weight: 700;
+  --mmt-nav-track: 0.2px;
+  --mmt-nav-underline: 2px;
+
+  scroll-padding-top: 140px;
 }
 
 * {
@@ -28,6 +35,7 @@ body {
     Arial,
     "Apple Color Emoji",
     "Segoe UI Emoji";
+  color: var(--mmt-ink);
 }
 
 html {
@@ -45,31 +53,152 @@ a {
   padding: 20px;
 }
 
-.card {
-  border: 1px solid #e6e6e6;
-  border-radius: 14px;
-  padding: 16px;
-}
+/* ===============================
+   Layout base
+================================ */
 
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 14px;
+  gap: 16px;
+}
+
+.card {
+  border: 1px solid var(--mmt-line);
+  border-radius: 14px;
+  padding: 16px;
 }
 
 .small {
-  color: #666;
   font-size: 13px;
+  color: rgba(0, 0, 0, 0.62);
 }
 
-/* Contact buttons: hover + focus-visible unificados */
-.mmt-contact-btn:hover {
-  opacity: 1;
-  border-color: rgba(255, 255, 255, 0.35);
+/* ===============================
+   Menú Café – MISMO SISTEMA QUE HEADER
+================================ */
+
+.menuPage {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
 }
 
-.mmt-contact-btn:focus-visible {
-  outline: 2px solid var(--mmt-gold);
-  outline-offset: 3px;
-  border-color: rgba(255, 255, 255, 0.35);
+.stickyStack {
+  position: sticky;
+  top: 96px;
+  z-index: 20;
+  background: #fff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.menuTopbarInner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 6px 20px;
+
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+/* Contenedor de categorías */
+.menuCats {
+  display: inline-flex;
+  gap: 18px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* ===== CATEGORÍA = LINK DEL HEADER ===== */
+.menuCat {
+  position: relative;
+  padding: 10px 6px;
+
+  background: none;
+  border: none;
+  appearance: none;
+
+  font-size: var(--mmt-nav-size);
+  font-weight: var(--mmt-nav-weight);
+  letter-spacing: var(--mmt-nav-track);
+
+  color: var(--mmt-ink-base);
+  cursor: pointer;
+
+  transition: color 160ms ease;
+}
+
+/* subrayado (idéntico al header) */
+.menuCat::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  bottom: 4px;
+  height: var(--mmt-nav-underline);
+  background: var(--mmt-gold);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 160ms ease;
+}
+
+.menuCat:hover {
+  color: var(--mmt-ink);
+}
+
+.menuCat:hover::after,
+.menuCat.isActive::after {
+  transform: scaleX(1);
+}
+
+.menuCat.isActive {
+  color: var(--mmt-ink);
+}
+
+/* ===============================
+   Secciones internas
+================================ */
+
+.sectionHeadRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 12px 0 16px;
+}
+
+/* filtro editorial (coherente, no protagonista) */
+.sectionFilter {
+  appearance: none;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--mmt-line);
+  padding: 4px 0;
+  font-size: 13px;
+  color: var(--mmt-ink);
+}
+
+.sectionFilter:focus-visible {
+  outline: none;
+  border-bottom-color: var(--mmt-gold);
+}
+
+/* ===============================
+   Responsive
+================================ */
+
+@media (max-width: 720px) {
+  .menuTopbarInner {
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  .menuCats {
+    gap: 14px;
+  }
+
+  .stickyStack {
+    top: 72px;
+  }
 }
