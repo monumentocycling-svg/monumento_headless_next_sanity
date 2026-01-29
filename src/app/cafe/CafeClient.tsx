@@ -13,6 +13,9 @@ const CATS: Cat[] = [
   { id: "otros", label: "Otros" },
 ];
 
+type CategoryId = Cat["id"];
+const CAT_IDS = new Set<CategoryId>(CATS.map((c) => c.id as CategoryId));
+
 // ===== Offsets para sticky + scroll =====
 const NAV_OFFSET = 64;
 const PAGE_HEADER_OFFSET = 132;
@@ -55,7 +58,7 @@ type MenuItem = {
 
   // normalizados
   category?: string; // cafés
-  categories?: string[]; // cervezas
+  categories?: unknown; // cervezas (IDs)
 
   // media
   mediaSrc?: string;
@@ -71,29 +74,17 @@ function formatCOP(n: number) {
 }
 
 function inferMediaType(i: MenuItem): "video" | "image" {
-  // Prioridad: videoUrl -> video
   if (i.mediaVideoUrl) return "video";
-
-  // mediaSrc por extensión
   const src = i.mediaSrc || "";
   if (/\.(mp4|webm|mov)$/i.test(src)) return "video";
   return "image";
 }
 
 function pickMediaSrc(i: MenuItem): string {
-  // Prioridad: videoUrl si existe
   if (i.mediaVideoUrl) return i.mediaVideoUrl;
-
-  // Si tienes ruta local (/public) úsala
   if (i.mediaSrc) return i.mediaSrc;
-
-  // Si subiste imagen a Sanity
   if (i.mediaImageUrl) return i.mediaImageUrl;
-
-  // Poster si existe
   if (i.posterUrl) return i.posterUrl;
-
-  // fallback
   return "/video-poster.webp";
 }
 
@@ -227,7 +218,13 @@ export default function CafeClient({
     .slice()
     .sort((a, b) => (a.order ?? 100) - (b.order ?? 100))
     .map((i) => {
-      const cats = Array.isArray(i.categories) ? i.categories : [];
+      const cats: CategoryId[] = Array.isArray(i.categories)
+        ? i.categories.filter(
+            (c): c is CategoryId =>
+              typeof c === "string" && CAT_IDS.has(c as CategoryId),
+          )
+        : [];
+
       return {
         nombre: i.title,
         estilo: i.beerStyle || "",
@@ -237,7 +234,7 @@ export default function CafeClient({
         descripcion: i.description || "",
         mediaSrc: pickMediaSrc(i),
         mediaType: inferMediaType(i),
-        categorias: cats as any[],
+        categorias: cats,
       };
     });
 
