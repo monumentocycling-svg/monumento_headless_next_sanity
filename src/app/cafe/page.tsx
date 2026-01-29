@@ -3,7 +3,10 @@ import CafeClient from "./CafeClient";
 import { sanityClient } from "@/lib/sanityClient";
 
 // ISR: evita “snapshot vacío” en producción y actualiza el contenido
-export const revalidate = 60;
+//export const revalidate = 60;
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
 
 type MenuItem = {
   _id: string;
