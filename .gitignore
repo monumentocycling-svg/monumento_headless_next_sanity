@@ -1,11 +1,23 @@
+# Dependencies
 node_modules
+
+# Next.js
 .next
 out
+
+# Environment variables
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
+
+# Logs / OS
 *.log
 .DS_Store
+
+# Vercel
 .vercel
+
+# Sanity Studio
 studio/node_modules
 studio/.sanity
+
